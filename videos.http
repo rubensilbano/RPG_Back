@@ -1,0 +1,57 @@
+# @api = http://localhost:4000
+# @api = http://127.0.0.1:3000
+@api = http://127.0.0.1:4000
+
+GET {{api}}/videos
+
+###
+
+GET {{api}}/videos/65240c9c654142977c07c7f9
+
+###
+
+POST {{api}}/player
+Content-Type: application/json
+# PARA QUE FUNCIONE, DEBE HABER UNA LINEA VACIA ENTRE LA DECLARACION Content-Type, Y EL JSON
+
+{
+    "NOMBRE": "Cesar",
+    "CLAVE": "123456"
+}
+
+###
+
+DELETE {{api}}/videos/6526b88e490323981928b16c
+
+###
+
+PUT {{api}}/videos/6526a9fdcadad47254adc413
+Content-Type: application/json
+# PARA QUE FUNCIONE, DEBE HABER UNA LINEA VACIA ENTRE LA DECLARACION Content-Type, Y EL JSON
+
+{
+    "title": "nuevo titulo, MERN STACK"
+}
+
+###
+
+PUT {{api}}/setSquad
+Content-Type: application/json
+# PARA QUE FUNCIONE, DEBE HABER UNA LINEA VACIA ENTRE LA DECLARACION Content-Type, Y EL JSON
+
+{
+    "list": [3,0,13,0,0,0,0,0,0,0]
+}
+
+###
+
+POST {{api}}/login
+Content-Type: application/json
+# PARA QUE FUNCIONE, DEBE HABER UNA LINEA VACIA ENTRE LA DECLARACION Content-Type, Y EL JSON
+
+{
+    "NOMBRE": "Alba",
+    "CLAVE": "asd123"
+}
+
+###

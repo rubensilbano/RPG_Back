@@ -1,0 +1,31 @@
+// INICIA Y EXPORTA EL OBJETO express
+
+// POSIBLEMENTE ES PARA LLAMAR A LOS ROUTES Y CONTROLLERS RECIBIENDO LOS REQUEST.
+// INDEX SE ENCARGA DE LLAMAR A APP.TS, BASICAMENTE COMO EL ANTERIOR PROYECTO.
+import express from "express"
+import morgan from "morgan"
+import cors from "cors"
+import config from "./config"
+// IMPORTA EL OBJETO router, QUE CONTIENE LAS LLAMADAS A RUTAS
+import videoRoutes from "./routes/RPG.routes";
+
+const app = express()
+
+// AHORA LLAMA AL PORT DESDE config.ts
+    // SEGUN EL ORDEN, PRIMERO BUSCA EL PORT EN .env, LA IMPORTA config.ts Y ESTE LA GUARDA COMO CREDENCIAL
+    // POR ULTIMO app.ts BUSCA EL PORT EN config.ts, PARA USARLA CUANDO index.ts INICIE
+app.set('port', config.MONGO_PORT);
+
+// morgan	SIRVE PARA MOSTRAR EN CONSOLA UN LOG DE LAS PETICIONES HTTP RECIBIDAS
+app.use(morgan('dev'));
+// cors	INDICA QUE SERVIDORES TIENEN PERMITIDO HACER PETICIONES.
+    // cors() VACIO, ESTA DECLARANDO QUE CUALQUIER SERVIDOR TIENE PERMITIDO CONECTARSE Y HACER PETICIONES.
+app.use(cors());
+// PERMITE RECIBIR OBJETOS JSON DESDE POST.
+app.use(express.json());
+// PERMITE RECIBIR FORMULARIOS DESDE POST, Y ENTENDER LOS CAMPOS ADJUNTOS.
+app.use(express.urlencoded({extended: false}));
+// ADJUNTA LAS RUTAS AL OBJETO app DE EXPRESS
+app.use(videoRoutes)
+
+export default app;
