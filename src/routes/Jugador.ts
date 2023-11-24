@@ -26,7 +26,7 @@ const jugadorSchema = new Schema({
     HEROE2: {
         type: Object,
         trim: true,
-        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0]}
+        default: {"NIVEL": 1, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0]}
     },
     HEROE3: {
         type: Object,
@@ -141,7 +141,7 @@ const jugadorSchema = new Schema({
     CANTIDAD: {
         type: Number,
         trim: true,
-        default: 0
+        default: 1
     },
     NIVEL: {
         type: Number,
@@ -171,12 +171,12 @@ const jugadorSchema = new Schema({
     DISPONIBLES: {
         type: Object,
         trim: true,
-        default: [[1,1000],[2,500],[3,300],[4,1000],[5,500]]
+        default: [[1,1000],[8,500],[3,300],[4,1000],[5,500]]
     },
     ESCUADRON: {
         type: Object,
         trim: true,
-        default: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        default: [2, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     },
     ZONA: {
         type: Number,
