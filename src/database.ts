@@ -45,17 +45,13 @@ import { hostname } from "os";
 // METODO DE RAILWAY
 // mongoose.connect(process.env.MONGO_URL);
 // ESTE METODO REEMPLAZA EL NOMBRE DE LA BD POR EL PUERTO HTTP
-
 mongoose.connect(
     `mongodb://${config.MONGO_USER}:${config.MONGO_PASSWORD}@${config.MONGO_HOST}:${config.MONGO_PORT}`
 );
-
 const database = mongoose.connection;
-
 database.on(
   "error",
   console.error.bind(console, "❌ mongodb ERROR DE CONEXION")
 );
 database.once("open", () => console.log("✅ mongodb CONECTADA EN EL SERVIDOR", mongoose.connection.name));
-
 mongoose.Promise = Promise;

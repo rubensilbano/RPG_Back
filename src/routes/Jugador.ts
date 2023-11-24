@@ -161,7 +161,7 @@ const jugadorSchema = new Schema({
     ACCION: {
         type: Number,
         trim: true,
-        default: 20
+        default: 0
     },
     FECHA: {
         type: Date,
@@ -191,7 +191,7 @@ const jugadorSchema = new Schema({
     PROXCAMP: {
         type: Number,
         trim: true,
-        default: 0
+        default: -1
     },
     ZONARUTA: {
         type: Object,

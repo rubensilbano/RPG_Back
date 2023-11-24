@@ -5,41 +5,46 @@
 import { Router } from "express"
 const router = Router();
 
-// * IMPORTA TODO EL MODULO, Y LE ASIGNA UN APODO videoCtrl
-import * as videoCtrl from "./RPG.controller";
+// * IMPORTA TODO EL MODULO, Y LE ASIGNA UN APODO rpgCtrl
+import * as rpgCtrl from "./RPG.controller";
 
 // UNA MISMA RUTA PUEDE TENER DOS CONTROLADORES DISTINTOS.
     // SI ESTOS SON DIFERENCIADOS POR LA CANTIDAD DE ARGUMENTOS/PROPS, O EL METODO HTTP
 
-router.post('/createPlayer', videoCtrl.createPlayer);
-router.post('/login', videoCtrl.login);
+router.post('/createPlayer', rpgCtrl.createPlayer);
+router.post('/login', rpgCtrl.login);
 
 
-router.get('/allPlayers', videoCtrl.getAllPlayers);
+// ESTA RUTA ES SOLO PARA DESARROLLO, MUESTRA TODOS LOS REGISTROS EN LA TABLA Jugadores.
+// NO DEBE EXISTIR EN EL DEPLOY.
+router.get('/allPlayers', rpgCtrl.getAllPlayers);
+// ESTA RUTA SIRVE PARA CREAR LOS REGISTROS CONSTANTES EN LAS TABLAS HEROES Y ENEMIGOS.
+// ESTO DEBIDO A QUE RAILWAY NO PERMITE INGRESAR MAS QUE UN REGISTRO A LA VEZ.
+router.get('/ASD123', rpgCtrl.respaldo);
 
 
 
 // ESTAS SON LAS RUTAS DEL ANTERIOR PROYECTO. NO OLVIDAR ELIMINARLAS
-router.delete('/videos/:id', videoCtrl.deleteVideo);
+router.delete('/videos/:id', rpgCtrl.deleteVideo);
 
 
 
-// router.get('/tavern', videoCtrl.tavern);
-router.post('/tavern', videoCtrl.tavern);
-// router.put('/buyHero/:id', videoCtrl.buyHero);
-router.post('/buyHero', videoCtrl.buyHero);
+// router.get('/tavern', rpgCtrl.tavern);
+router.post('/tavern', rpgCtrl.tavern);
+// router.put('/buyHero/:id', rpgCtrl.buyHero);
+router.post('/buyHero', rpgCtrl.buyHero);
 
 // LA RUTA getAvailable NO ES NECESARIA.
-router.get('/getAvailable', videoCtrl.getAvailable);
-// router.put('/setSquad', videoCtrl.setSquad);
-router.post('/setSquad', videoCtrl.setSquad);
+router.get('/getAvailable', rpgCtrl.getAvailable);
+// router.put('/setSquad', rpgCtrl.setSquad);
+router.post('/setSquad', rpgCtrl.setSquad);
 
-// router.get('/zone/:id', videoCtrl.getZone);
-router.post('/zone', videoCtrl.getZone);
-// router.get('/route/:zone/:route', videoCtrl.getRoute);
-router.post('/route', videoCtrl.getRoute);
-// router.get('/battle/:zone/:route/:camp', videoCtrl.battle);
-router.post('/battle', videoCtrl.battle);
+// router.get('/zone/:id', rpgCtrl.getZone);
+router.post('/zone', rpgCtrl.getZone);
+// router.get('/route/:zone/:route', rpgCtrl.getRoute);
+router.post('/route', rpgCtrl.getRoute);
+// router.get('/battle/:zone/:route/:camp', rpgCtrl.battle);
+router.post('/battle', rpgCtrl.battle);
 
 export default router;
     
