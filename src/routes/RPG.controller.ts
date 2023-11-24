@@ -1092,6 +1092,7 @@ export const battle: RequestHandler = async (req,res) => {
                                 console.log("turno jugador")
                                 console.log(lisUnidades.length)
                                 console.log(lisEnemigos.length)
+                                console.log(reloj)
                                 // REVISA TURNOS DEL JUGADOR
                                 // TAMBIEN EVALUA QUE NO SEA UN SANADOR, EN ESE CASO USA UNA FUNCION DISTINTA
                                 for (let index = 0; index < lisUnidades.length; index++) {
