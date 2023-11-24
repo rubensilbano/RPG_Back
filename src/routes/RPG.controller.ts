@@ -1021,13 +1021,6 @@ export const battle: RequestHandler = async (req,res) => {
         // Y LA COLECCION DE ATRIBUTOS MINIMOS Y MAXIMOS COMPLETA
             // Y CON ELLA CALCULA LOS ATRIBUTOS DE CADA UNIDAD
         lisUnidades = calcularAtributosHeroes(datosJson["ESCUADRON"], datosJson, todosLosHeroes)
-
-        console.log("ERRORES INICIALES")
-        console.log(idZona)
-        console.log(idCamp)
-        console.log(datosJson["PROXCAMP"])
-        console.log(todosLosEnemigos)
-
         if ((idZona > 0) && (idZona < 11)) {
             if ((idRuta > 0) && (idRuta < 6)) {
                 if ((-1 < idCamp)&&(idCamp < 10)) {
@@ -1096,9 +1089,6 @@ export const battle: RequestHandler = async (req,res) => {
         
                             // MIENTRAS UNA DE LAS LISTAS TENGA ELEMENTOS, LA BATALLA CONTINUA
                             while (TerminoBatalla == false) {
-
-                                // console.log("turno jugador")
-
                                 // REVISA TURNOS DEL JUGADOR
                                 // TAMBIEN EVALUA QUE NO SEA UN SANADOR, EN ESE CASO USA UNA FUNCION DISTINTA
                                 for (let index = 0; index < lisUnidades.length; index++) {
@@ -1129,9 +1119,6 @@ export const battle: RequestHandler = async (req,res) => {
                                 }
                                 // REVISA TURNOS DEL ENEMIGO
                                 if (TerminoBatalla == false) {
-
-                                    // console.log("turno enemigo")
-
                                     for (let index = 0; index < lisEnemigos.length; index++) {
                                         if (lisUnidades.length > 0) {
                                             if (reloj >= lisEnemigos[index]["PROXATAQUE"]) {
@@ -1195,9 +1182,6 @@ export const battle: RequestHandler = async (req,res) => {
                                 }
                             }
                             lisrespuesta.push(lisAux)
-
-                            console.log(lisrespuesta[0])
-
                             // GUARDANDO LAS RECOMPENSAS
                             let jugador;
                             const monedasFinal = datosJson["MONEDAS"] + monedasRecompensa
