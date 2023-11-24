@@ -33,10 +33,10 @@ const enemigoSchema = new Schema({
         type: Number,
         trim: true
     },
-    EXPERIENCIA: {
-        type: Number,
-        trim: true
-    },
+    // EXPERIENCIA: {
+    //     type: Number,
+    //     trim: true
+    // },
     ATAQUE: {
         type: Number,
         trim: true

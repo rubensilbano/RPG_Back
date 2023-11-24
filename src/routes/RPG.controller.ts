@@ -1021,6 +1021,13 @@ export const battle: RequestHandler = async (req,res) => {
         // Y LA COLECCION DE ATRIBUTOS MINIMOS Y MAXIMOS COMPLETA
             // Y CON ELLA CALCULA LOS ATRIBUTOS DE CADA UNIDAD
         lisUnidades = calcularAtributosHeroes(datosJson["ESCUADRON"], datosJson, todosLosHeroes)
+
+        console.log("ERRORES INICIALES")
+        console.log(idZona)
+        console.log(idCamp)
+        console.log(datosJson["PROXCAMP"])
+        console.log(todosLosEnemigos)
+
         if ((idZona > 0) && (idZona < 11)) {
             if ((idRuta > 0) && (idRuta < 6)) {
                 if ((-1 < idCamp)&&(idCamp < 10)) {
@@ -1089,10 +1096,9 @@ export const battle: RequestHandler = async (req,res) => {
         
                             // MIENTRAS UNA DE LAS LISTAS TENGA ELEMENTOS, LA BATALLA CONTINUA
                             while (TerminoBatalla == false) {
-                                console.log("turno jugador")
-                                console.log(lisUnidades.length)
-                                console.log(lisEnemigos.length)
-                                console.log(reloj)
+
+                                // console.log("turno jugador")
+
                                 // REVISA TURNOS DEL JUGADOR
                                 // TAMBIEN EVALUA QUE NO SEA UN SANADOR, EN ESE CASO USA UNA FUNCION DISTINTA
                                 for (let index = 0; index < lisUnidades.length; index++) {
@@ -1123,7 +1129,9 @@ export const battle: RequestHandler = async (req,res) => {
                                 }
                                 // REVISA TURNOS DEL ENEMIGO
                                 if (TerminoBatalla == false) {
-                                    console.log("turno enemigo")
+
+                                    // console.log("turno enemigo")
+
                                     for (let index = 0; index < lisEnemigos.length; index++) {
                                         if (lisUnidades.length > 0) {
                                             if (reloj >= lisEnemigos[index]["PROXATAQUE"]) {
@@ -1371,7 +1379,7 @@ function calcularAtributosEnemigos(lisIndices: any, todosLosEnemigos: any) {
         const enemigoActual = todosLosEnemigos[lisIndices[index]]
         const nombre = JSON.parse(JSON.stringify(enemigoActual))["NOMBRE"]
         const nivel = JSON.parse(JSON.stringify(enemigoActual))["NIVEL"]
-        const experiencia = JSON.parse(JSON.stringify(enemigoActual))["EXPERIENCIA"]
+        // const experiencia = JSON.parse(JSON.stringify(enemigoActual))["EXPERIENCIA"]
         const ataque = JSON.parse(JSON.stringify(enemigoActual))["ATAQUE"]
         const defensa = JSON.parse(JSON.stringify(enemigoActual))["DEFENSA"]
         const vidatotal = JSON.parse(JSON.stringify(enemigoActual))["VIDA"]
@@ -1385,7 +1393,7 @@ function calcularAtributosEnemigos(lisIndices: any, todosLosEnemigos: any) {
             "NOMBRE": nombre,
             "NIVEL": nivel,
             "ATAQUE": ataque,
-            "EXPERIENCIA": experiencia,
+            // "EXPERIENCIA": experiencia,
             "DEFENSA": defensa,
             "VIDATOTAL": vidatotal,
             "VIDAACTUAL": vidatotal,
