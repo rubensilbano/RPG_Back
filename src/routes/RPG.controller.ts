@@ -1139,21 +1139,21 @@ export const battle: RequestHandler = async (req,res) => {
                                 reloj += 0.1
                                 if (reloj >= relojEntero) {
                                     // APLICAR REGENERACIONES
-                                    // console.log("HEROES")
+                                    console.log("HEROES")
                                     for (let index = 0; index < lisUnidades.length; index++) {
                                         lisUnidades[index]["VIDAACTUAL"] += lisUnidades[index]["REGENERACION"]
                                         if (lisUnidades[index]["VIDAACTUAL"] > lisUnidades[index]["VIDATOTAL"]) {
                                             lisUnidades[index]["VIDAACTUAL"] = lisUnidades[index]["VIDATOTAL"]
                                         }
-                                        // console.log(lisUnidades[index]["VIDAACTUAL"])
+                                        console.log(lisUnidades[index]["VIDAACTUAL"])
                                     }
-                                    // console.log("ENEMIGOS")
+                                    console.log("ENEMIGOS")
                                     for (let index = 0; index < lisEnemigos.length; index++) {
                                         lisEnemigos[index]["VIDAACTUAL"] += lisEnemigos[index]["REGENERACION"]
                                         if (lisEnemigos[index]["VIDAACTUAL"] > lisEnemigos[index]["VIDATOTAL"]) {
                                             lisEnemigos[index]["VIDAACTUAL"] = lisEnemigos[index]["VIDATOTAL"]
                                         }
-                                        // console.log(lisEnemigos[index]["VIDAACTUAL"])
+                                        console.log(lisEnemigos[index]["VIDAACTUAL"])
                                     }
                                     relojEntero += 1
                                 }
@@ -1182,6 +1182,9 @@ export const battle: RequestHandler = async (req,res) => {
                                 }
                             }
                             lisrespuesta.push(lisAux)
+
+                            console.log(lisrespuesta[0])
+
                             // GUARDANDO LAS RECOMPENSAS
                             let jugador;
                             const monedasFinal = datosJson["MONEDAS"] + monedasRecompensa
