@@ -1090,6 +1090,8 @@ export const battle: RequestHandler = async (req,res) => {
                             // MIENTRAS UNA DE LAS LISTAS TENGA ELEMENTOS, LA BATALLA CONTINUA
                             while (TerminoBatalla == false) {
                                 console.log("turno jugador")
+                                console.log(lisUnidades.length)
+                                console.log(lisEnemigos.length)
                                 // REVISA TURNOS DEL JUGADOR
                                 // TAMBIEN EVALUA QUE NO SEA UN SANADOR, EN ESE CASO USA UNA FUNCION DISTINTA
                                 for (let index = 0; index < lisUnidades.length; index++) {
