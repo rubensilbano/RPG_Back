@@ -1089,6 +1089,7 @@ export const battle: RequestHandler = async (req,res) => {
         
                             // MIENTRAS UNA DE LAS LISTAS TENGA ELEMENTOS, LA BATALLA CONTINUA
                             while (TerminoBatalla == false) {
+                                console.log("turno jugador")
                                 // REVISA TURNOS DEL JUGADOR
                                 // TAMBIEN EVALUA QUE NO SEA UN SANADOR, EN ESE CASO USA UNA FUNCION DISTINTA
                                 for (let index = 0; index < lisUnidades.length; index++) {
@@ -1119,6 +1120,7 @@ export const battle: RequestHandler = async (req,res) => {
                                 }
                                 // REVISA TURNOS DEL ENEMIGO
                                 if (TerminoBatalla == false) {
+                                    console.log("turno enemigo")
                                     for (let index = 0; index < lisEnemigos.length; index++) {
                                         if (lisUnidades.length > 0) {
                                             if (reloj >= lisEnemigos[index]["PROXATAQUE"]) {
@@ -1139,21 +1141,21 @@ export const battle: RequestHandler = async (req,res) => {
                                 reloj += 0.1
                                 if (reloj >= relojEntero) {
                                     // APLICAR REGENERACIONES
-                                    console.log("HEROES")
+                                    // console.log("HEROES")
                                     for (let index = 0; index < lisUnidades.length; index++) {
                                         lisUnidades[index]["VIDAACTUAL"] += lisUnidades[index]["REGENERACION"]
                                         if (lisUnidades[index]["VIDAACTUAL"] > lisUnidades[index]["VIDATOTAL"]) {
                                             lisUnidades[index]["VIDAACTUAL"] = lisUnidades[index]["VIDATOTAL"]
                                         }
-                                        console.log(lisUnidades[index]["VIDAACTUAL"])
+                                        // console.log(lisUnidades[index]["VIDAACTUAL"])
                                     }
-                                    console.log("ENEMIGOS")
+                                    // console.log("ENEMIGOS")
                                     for (let index = 0; index < lisEnemigos.length; index++) {
                                         lisEnemigos[index]["VIDAACTUAL"] += lisEnemigos[index]["REGENERACION"]
                                         if (lisEnemigos[index]["VIDAACTUAL"] > lisEnemigos[index]["VIDATOTAL"]) {
                                             lisEnemigos[index]["VIDAACTUAL"] = lisEnemigos[index]["VIDATOTAL"]
                                         }
-                                        console.log(lisEnemigos[index]["VIDAACTUAL"])
+                                        // console.log(lisEnemigos[index]["VIDAACTUAL"])
                                     }
                                     relojEntero += 1
                                 }
@@ -1259,6 +1261,9 @@ export const battle: RequestHandler = async (req,res) => {
     }
 }
 function atacarEliminar(Atacante: any, lisRivales: any, atacanteHeroe: boolean, ruta: number) {
+
+    console.log("ESTA EJECUTANDO")
+
     // ESTA FUNCION ESCOGE EL ELEMENTO 0 EN LA LISTA DEL RIVAL, Y LE DESCUENTA VIDA.
         // TAMBIEN ELIMINA EL ELEMENTO 0, SI ESTE NO TIENE VIDA
     // EVALUA SI atacanteHeroe ES TRUE, ENTONCES CALCULA LA RECOMPENSA EN MONEDAS Y LA ADJUNTA A LA RESPUESTA
