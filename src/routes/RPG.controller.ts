@@ -1069,22 +1069,14 @@ export const battle: RequestHandler = async (req,res) => {
                                 // ASIGNAR DE ESTA FORMA LOS JSON, ASEGURA QUE SERAN COPIAS INDEPENDIENTES Y SIN REFERENCIA
                                 // const heroes = await Heroe.findOne({"NOMBRE": "Guerrero"}).exec();
                                 // lisEnemigos.push(JSON.parse(JSON.stringify(heroes)) as typeof heroes)
-                                
-                                console.log("RECUPERANDO DATOS")
-                                console.log(datosJson["ARRAYRUTA"])
-                                console.log(idCamp)
-                                console.log(lisEnemigos)
 
                                 let jugador;
-                                if (0 <= lisEnemigos.length) {
+                                if (0 == lisEnemigos.length) {
                                     jugador = await Jugador.findOneAndUpdate({"NOMBRE": req.body.NOMBRE}, {$set : {"ZONARUTA": [0, 0], "PROXCAMP": -1}}, {new: true})
                                     console.log("SIN ENEMIGOS")
                                     return res.json(
                                         {"message": "SIN ENEMIGOS",
                                         "datosJugador": jugador});
-                                        
-                                    // REVISAR COMO RECIBE LOS CAMBIOS EL FRONTEND
-
                                 } else {
                                     let TerminoBatalla = false
                                     let lisrespuesta = new Array<any>()
