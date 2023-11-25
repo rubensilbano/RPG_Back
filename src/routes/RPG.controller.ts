@@ -1069,172 +1069,183 @@ export const battle: RequestHandler = async (req,res) => {
                                 // ASIGNAR DE ESTA FORMA LOS JSON, ASEGURA QUE SERAN COPIAS INDEPENDIENTES Y SIN REFERENCIA
                                 // const heroes = await Heroe.findOne({"NOMBRE": "Guerrero"}).exec();
                                 // lisEnemigos.push(JSON.parse(JSON.stringify(heroes)) as typeof heroes)
-            
-                                let TerminoBatalla = false
-                                let lisrespuesta = new Array<any>()
-                                let lisaux = new Array<any>()
-                                let reloj = 0.0
-                                let relojEntero = 1
-                                let monedasRecompensa = 0
-                                let experienciaRecompensa = 0
-                                let unidadesIniciales = new Array<any>()
-                                let enemigosIniciales = new Array<any>()
-                                for (let index = 0; index < lisUnidades.length; index++) {
-                                    unidadesIniciales.push([lisUnidades[index].NOMBRE, 0, lisUnidades[index].VIDATOTAL.toFixed(2)])
-                                }
-                                for (let index = 0; index < lisEnemigos.length; index++) {
-                                    enemigosIniciales.push([lisEnemigos[index].NOMBRE, 0, lisEnemigos[index].VIDATOTAL.toFixed(2)])
-                                }
                                 
-                                console.log("INICIA SIMULACRO")
-            
-                                // MIENTRAS UNA DE LAS LISTAS TENGA ELEMENTOS, LA BATALLA CONTINUA
-                                while (TerminoBatalla == false) {
-                                    // REVISA TURNOS DEL JUGADOR
-                                    // TAMBIEN EVALUA QUE NO SEA UN SANADOR, EN ESE CASO USA UNA FUNCION DISTINTA
-                                    for (let index = 0; index < lisUnidades.length; index++) {
-                                        if (lisEnemigos.length > 0) {
-                                            if (reloj >= lisUnidades[index]["PROXATAQUE"]) {
-                                                if (lisUnidades[index]["SANADOR"]) {
-                                                    // ESTA FUNCION BUSCA UN OBJETIVO Y LO CURA
-                                                    // ES SIMILAR A atacarEliminar, PERO REQUIERE EL INDICE DEL SANADOR, Y EL reloj.
-                                                    // EN CASO DE NO ENCONTRAR NI UN OBJETIVO, POSPONE LA MITAD DE TIEMPO.
-                                                    // EL "PROXATAQUE" SE ASIGNA DENTRO DE LA FUNCION
-                                                    lisUnidades = buscarCurar(index, lisUnidades, reloj);
-                                                } else {
-                                                    lisaux = atacarEliminar(lisUnidades[index], lisEnemigos, true, idCamp);
-                                                    monedasRecompensa += parseInt(lisaux[0])
-                                                    experienciaRecompensa += parseInt(lisaux[1])
-                                                    lisEnemigos = lisaux[2]
-                                                    lisUnidades[index]["PROXATAQUE"] = reloj + lisUnidades[index]["CADENCIA"]
-                                                    if (lisEnemigos.length <= 0) {
-                                                        TerminoBatalla = true
-                                                        lisrespuesta.push("VICTORIA")
-                                                        // for (let index = 0; index < lisUnidades.length; index++) {
-                                                        //     lisrespuesta.push([lisUnidades[index].NOMBRE, lisUnidades[index].VIDAACTUAL.toFixed(2)])
-                                                        // }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                    // REVISA TURNOS DEL ENEMIGO
-                                    if (TerminoBatalla == false) {
-                                        for (let index = 0; index < lisEnemigos.length; index++) {
-                                            if (lisUnidades.length > 0) {
-                                                if (reloj >= lisEnemigos[index]["PROXATAQUE"]) {
-                                                    lisaux = atacarEliminar(lisEnemigos[index], lisUnidades, false, idCamp);
-                                                    lisUnidades = lisaux[2]
-                                                    lisEnemigos[index]["PROXATAQUE"] = reloj + lisEnemigos[index]["CADENCIA"]
-                                                    if (lisUnidades.length <= 0) {
-                                                        TerminoBatalla = true
-                                                        lisrespuesta.push("DERROTA")
-                                                        // for (let index = 0; index < lisEnemigos.length; index++) {
-                                                        //     lisrespuesta.push([lisEnemigos[index].NOMBRE, lisEnemigos[index].VIDAACTUAL.toFixed(2)])
-                                                        // }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                    reloj += 0.1
-                                    if (reloj >= relojEntero) {
-                                        // APLICAR REGENERACIONES
-                                        // console.log("HEROES")
-                                        for (let index = 0; index < lisUnidades.length; index++) {
-                                            lisUnidades[index]["VIDAACTUAL"] += lisUnidades[index]["REGENERACION"]
-                                            if (lisUnidades[index]["VIDAACTUAL"] > lisUnidades[index]["VIDATOTAL"]) {
-                                                lisUnidades[index]["VIDAACTUAL"] = lisUnidades[index]["VIDATOTAL"]
-                                            }
-                                            // console.log(lisUnidades[index]["VIDAACTUAL"])
-                                        }
-                                        // console.log("ENEMIGOS")
-                                        for (let index = 0; index < lisEnemigos.length; index++) {
-                                            lisEnemigos[index]["VIDAACTUAL"] += lisEnemigos[index]["REGENERACION"]
-                                            if (lisEnemigos[index]["VIDAACTUAL"] > lisEnemigos[index]["VIDATOTAL"]) {
-                                                lisEnemigos[index]["VIDAACTUAL"] = lisEnemigos[index]["VIDATOTAL"]
-                                            }
-                                            // console.log(lisEnemigos[index]["VIDAACTUAL"])
-                                        }
-                                        relojEntero += 1
-                                    }
-                                }
-                                // ADJUNTAR UNIDADES Y ENEMIGOS
-                                lisrespuesta.push(unidadesIniciales)
-                                lisrespuesta.push(enemigosIniciales)
-                                let lisAux = new Array<any>()
-                                if (lisrespuesta[0] == "VICTORIA") {
-                                    for (let index = 0; index < lisUnidades.length; index++) {
-                                        lisAux.push(lisUnidades[index].VIDAACTUAL.toFixed(2))
-                                    }
-                                    let ultimoIndice = lisrespuesta[1].length - 1
-                                    for (let i = lisAux.length - 1; -1 < i; i--) {
-                                        lisrespuesta[1][ultimoIndice][1] = lisAux[i]
-                                        ultimoIndice -= 1
-                                    }
-                                } else {
-                                    for (let index = 0; index < lisEnemigos.length; index++) {
-                                        lisAux.push(lisEnemigos[index].VIDAACTUAL.toFixed(2))
-                                    }
-                                    let ultimoIndice = lisrespuesta[2].length - 1
-                                    for (let i = lisAux.length - 1; -1 < i; i--) {
-                                        lisrespuesta[2][ultimoIndice][1] = lisAux[i]
-                                        ultimoIndice -= 1
-                                    }
-                                }
-                                lisrespuesta.push(lisAux)
-                                // GUARDANDO LAS RECOMPENSAS
                                 let jugador;
-                                const monedasFinal = datosJson["MONEDAS"] + monedasRecompensa
-                                let experienciaJugador = datosJson["EXPERIENCIA"] + experienciaRecompensa
-                                let accionJugador = datosJson["ACCION"] - puntosNecesarios
-                                if (lisrespuesta[0] == "VICTORIA") {
-                                    let proxCampamentoJugador = indiceGuardado + 1
-                                    let zonaJugador = datosJson["ZONA"]
-                                    if (proxCampamentoJugador > datosJson["ARRAYRUTA"].length - 1) {
-                                        zonaJugador += 1
-                                        proxCampamentoJugador = -1
+                                if (0 <= lisEnemigos.length) {
+                                    jugador = await Jugador.findOneAndUpdate({"NOMBRE": req.body.NOMBRE}, {$set : {"ZONARUTA": [0, 0], "PROXCAMP": -1}}, {new: true})
+                                    console.log("SIN ENEMIGOS")
+                                    return res.json(
+                                        {"message": "SIN ENEMIGOS",
+                                        "datosJugador": jugador});
+                                        
+                                    // REVISAR COMO RECIBE LOS CAMBIOS EL FRONTEND
+
+                                } else {
+                                    let TerminoBatalla = false
+                                    let lisrespuesta = new Array<any>()
+                                    let lisaux = new Array<any>()
+                                    let reloj = 0.0
+                                    let relojEntero = 1
+                                    let monedasRecompensa = 0
+                                    let experienciaRecompensa = 0
+                                    let unidadesIniciales = new Array<any>()
+                                    let enemigosIniciales = new Array<any>()
+                                    for (let index = 0; index < lisUnidades.length; index++) {
+                                        unidadesIniciales.push([lisUnidades[index].NOMBRE, 0, lisUnidades[index].VIDATOTAL.toFixed(2)])
                                     }
-                                    // GUARDANDO EXP PARA CADA HEROE EN EL ESCUADRON
-                                    for (let i = 0; i < datosJson["ESCUADRON"].length; i++) {
-                                        if (parseInt(datosJson["ESCUADRON"][i]) > 0) {
-                                            // SUBIR DE NIVEL CADA HEROE EN EL ESCUADRON
-                                            let nuevoNivel = datosJson["HEROE" + datosJson["ESCUADRON"][i]]["NIVEL"]
-                                            let expNecesaria = 50 * (nuevoNivel**2 + nuevoNivel - 2)
-                                            let experienciaHeroe = datosJson["HEROE" + datosJson["ESCUADRON"][i]]["EXPERIENCIA"] + experienciaRecompensa
-                                            while (experienciaHeroe >= expNecesaria) {
-                                                nuevoNivel += 1
-                                                experienciaHeroe = experienciaHeroe - expNecesaria
-                                                expNecesaria = 50 * (nuevoNivel**2 + nuevoNivel - 2)
+                                    for (let index = 0; index < lisEnemigos.length; index++) {
+                                        enemigosIniciales.push([lisEnemigos[index].NOMBRE, 0, lisEnemigos[index].VIDATOTAL.toFixed(2)])
+                                    }
+                                    
+                                    console.log("INICIA SIMULACRO")
+                
+                                    // MIENTRAS UNA DE LAS LISTAS TENGA ELEMENTOS, LA BATALLA CONTINUA
+                                    while (TerminoBatalla == false) {
+                                        // REVISA TURNOS DEL JUGADOR
+                                        // TAMBIEN EVALUA QUE NO SEA UN SANADOR, EN ESE CASO USA UNA FUNCION DISTINTA
+                                        for (let index = 0; index < lisUnidades.length; index++) {
+                                            if (lisEnemigos.length > 0) {
+                                                if (reloj >= lisUnidades[index]["PROXATAQUE"]) {
+                                                    if (lisUnidades[index]["SANADOR"]) {
+                                                        // ESTA FUNCION BUSCA UN OBJETIVO Y LO CURA
+                                                        // ES SIMILAR A atacarEliminar, PERO REQUIERE EL INDICE DEL SANADOR, Y EL reloj.
+                                                        // EN CASO DE NO ENCONTRAR NI UN OBJETIVO, POSPONE LA MITAD DE TIEMPO.
+                                                        // EL "PROXATAQUE" SE ASIGNA DENTRO DE LA FUNCION
+                                                        lisUnidades = buscarCurar(index, lisUnidades, reloj);
+                                                    } else {
+                                                        lisaux = atacarEliminar(lisUnidades[index], lisEnemigos, true, idCamp);
+                                                        monedasRecompensa += parseInt(lisaux[0])
+                                                        experienciaRecompensa += parseInt(lisaux[1])
+                                                        lisEnemigos = lisaux[2]
+                                                        lisUnidades[index]["PROXATAQUE"] = reloj + lisUnidades[index]["CADENCIA"]
+                                                        if (lisEnemigos.length <= 0) {
+                                                            TerminoBatalla = true
+                                                            lisrespuesta.push("VICTORIA")
+                                                            // for (let index = 0; index < lisUnidades.length; index++) {
+                                                            //     lisrespuesta.push([lisUnidades[index].NOMBRE, lisUnidades[index].VIDAACTUAL.toFixed(2)])
+                                                            // }
+                                                        }
+                                                    }
+                                                }
                                             }
-                                            const heroeJson = {
-                                                "NIVEL": nuevoNivel,
-                                                "EXPERIENCIA": experienciaHeroe,
-                                                "OBJETOS": [0, 0, 0, 0, 0]
+                                        }
+                                        // REVISA TURNOS DEL ENEMIGO
+                                        if (TerminoBatalla == false) {
+                                            for (let index = 0; index < lisEnemigos.length; index++) {
+                                                if (lisUnidades.length > 0) {
+                                                    if (reloj >= lisEnemigos[index]["PROXATAQUE"]) {
+                                                        lisaux = atacarEliminar(lisEnemigos[index], lisUnidades, false, idCamp);
+                                                        lisUnidades = lisaux[2]
+                                                        lisEnemigos[index]["PROXATAQUE"] = reloj + lisEnemigos[index]["CADENCIA"]
+                                                        if (lisUnidades.length <= 0) {
+                                                            TerminoBatalla = true
+                                                            lisrespuesta.push("DERROTA")
+                                                            // for (let index = 0; index < lisEnemigos.length; index++) {
+                                                            //     lisrespuesta.push([lisEnemigos[index].NOMBRE, lisEnemigos[index].VIDAACTUAL.toFixed(2)])
+                                                            // }
+                                                        }
+                                                    }
+                                                }
                                             }
-                                            await Jugador.findOneAndUpdate({"NOMBRE": req.body.NOMBRE}, {$set : {["HEROE" + datosJson["ESCUADRON"][i]]: heroeJson}}, {new: true})
+                                        }
+                                        reloj += 0.1
+                                        if (reloj >= relojEntero) {
+                                            // APLICAR REGENERACIONES
+                                            // console.log("HEROES")
+                                            for (let index = 0; index < lisUnidades.length; index++) {
+                                                lisUnidades[index]["VIDAACTUAL"] += lisUnidades[index]["REGENERACION"]
+                                                if (lisUnidades[index]["VIDAACTUAL"] > lisUnidades[index]["VIDATOTAL"]) {
+                                                    lisUnidades[index]["VIDAACTUAL"] = lisUnidades[index]["VIDATOTAL"]
+                                                }
+                                                // console.log(lisUnidades[index]["VIDAACTUAL"])
+                                            }
+                                            // console.log("ENEMIGOS")
+                                            for (let index = 0; index < lisEnemigos.length; index++) {
+                                                lisEnemigos[index]["VIDAACTUAL"] += lisEnemigos[index]["REGENERACION"]
+                                                if (lisEnemigos[index]["VIDAACTUAL"] > lisEnemigos[index]["VIDATOTAL"]) {
+                                                    lisEnemigos[index]["VIDAACTUAL"] = lisEnemigos[index]["VIDATOTAL"]
+                                                }
+                                                // console.log(lisEnemigos[index]["VIDAACTUAL"])
+                                            }
+                                            relojEntero += 1
                                         }
                                     }
-                                    // SUBIR DE NIVEL JUGADOR
-                                    let nuevoNivel = datosJson["NIVEL"]
-                                    let expNecesaria = 50 * ((nuevoNivel + 1)**2 + (nuevoNivel + 1) - 2)
-                                    while (experienciaJugador >= expNecesaria) {
-                                        nuevoNivel += 1
-                                        experienciaJugador = experienciaJugador - expNecesaria
-                                        expNecesaria = 50 * ((nuevoNivel + 1)**2 + (nuevoNivel + 1) - 2)
+                                    // ADJUNTAR UNIDADES Y ENEMIGOS
+                                    lisrespuesta.push(unidadesIniciales)
+                                    lisrespuesta.push(enemigosIniciales)
+                                    let lisAux = new Array<any>()
+                                    if (lisrespuesta[0] == "VICTORIA") {
+                                        for (let index = 0; index < lisUnidades.length; index++) {
+                                            lisAux.push(lisUnidades[index].VIDAACTUAL.toFixed(2))
+                                        }
+                                        let ultimoIndice = lisrespuesta[1].length - 1
+                                        for (let i = lisAux.length - 1; -1 < i; i--) {
+                                            lisrespuesta[1][ultimoIndice][1] = lisAux[i]
+                                            ultimoIndice -= 1
+                                        }
+                                    } else {
+                                        for (let index = 0; index < lisEnemigos.length; index++) {
+                                            lisAux.push(lisEnemigos[index].VIDAACTUAL.toFixed(2))
+                                        }
+                                        let ultimoIndice = lisrespuesta[2].length - 1
+                                        for (let i = lisAux.length - 1; -1 < i; i--) {
+                                            lisrespuesta[2][ultimoIndice][1] = lisAux[i]
+                                            ultimoIndice -= 1
+                                        }
                                     }
-                                    // ARRIBA, EN EL WHILE PARA SUBIR DE NIVEL LOS HEROES, HAY VARIOS CAMBIOS EN EL REGISTRO, PERO ESTOS NO SON DEFINITIVOS.
-                                        // SIN EMBARGO ESTE SI ES EL ULTIMO CAMBIO QUE ASEGURA GUARDAR EL RESULTADO DEL COMBATE. Y ES EL QEU SE DEVUELVE AL App DEL FRONTEND.
-                                    jugador = await Jugador.findOneAndUpdate({"NOMBRE": req.body.NOMBRE}, {$set : {"MONEDAS": monedasFinal, "NIVEL": nuevoNivel, "EXPERIENCIA": experienciaJugador, "ACCION": accionJugador, "PROXCAMP": proxCampamentoJugador, "ZONA": zonaJugador}}, {new: true})
-                                } else {
-                                    jugador = await Jugador.findOneAndUpdate({"NOMBRE": req.body.NOMBRE}, {$set : {"ACCION": accionJugador}}, {new: true})
-                                }
+                                    lisrespuesta.push(lisAux)
+                                    // GUARDANDO LAS RECOMPENSAS
+                                    const monedasFinal = datosJson["MONEDAS"] + monedasRecompensa
+                                    let experienciaJugador = datosJson["EXPERIENCIA"] + experienciaRecompensa
+                                    let accionJugador = datosJson["ACCION"] - puntosNecesarios
+                                    if (lisrespuesta[0] == "VICTORIA") {
+                                        let proxCampamentoJugador = indiceGuardado + 1
+                                        let zonaJugador = datosJson["ZONA"]
+                                        if (proxCampamentoJugador > datosJson["ARRAYRUTA"].length - 1) {
+                                            zonaJugador += 1
+                                            proxCampamentoJugador = -1
+                                        }
+                                        // GUARDANDO EXP PARA CADA HEROE EN EL ESCUADRON
+                                        for (let i = 0; i < datosJson["ESCUADRON"].length; i++) {
+                                            if (parseInt(datosJson["ESCUADRON"][i]) > 0) {
+                                                // SUBIR DE NIVEL CADA HEROE EN EL ESCUADRON
+                                                let nuevoNivel = datosJson["HEROE" + datosJson["ESCUADRON"][i]]["NIVEL"]
+                                                let expNecesaria = 50 * (nuevoNivel**2 + nuevoNivel - 2)
+                                                let experienciaHeroe = datosJson["HEROE" + datosJson["ESCUADRON"][i]]["EXPERIENCIA"] + experienciaRecompensa
+                                                while (experienciaHeroe >= expNecesaria) {
+                                                    nuevoNivel += 1
+                                                    experienciaHeroe = experienciaHeroe - expNecesaria
+                                                    expNecesaria = 50 * (nuevoNivel**2 + nuevoNivel - 2)
+                                                }
+                                                const heroeJson = {
+                                                    "NIVEL": nuevoNivel,
+                                                    "EXPERIENCIA": experienciaHeroe,
+                                                    "OBJETOS": [0, 0, 0, 0, 0]
+                                                }
+                                                await Jugador.findOneAndUpdate({"NOMBRE": req.body.NOMBRE}, {$set : {["HEROE" + datosJson["ESCUADRON"][i]]: heroeJson}}, {new: true})
+                                            }
+                                        }
+                                        // SUBIR DE NIVEL JUGADOR
+                                        let nuevoNivel = datosJson["NIVEL"]
+                                        let expNecesaria = 50 * ((nuevoNivel + 1)**2 + (nuevoNivel + 1) - 2)
+                                        while (experienciaJugador >= expNecesaria) {
+                                            nuevoNivel += 1
+                                            experienciaJugador = experienciaJugador - expNecesaria
+                                            expNecesaria = 50 * ((nuevoNivel + 1)**2 + (nuevoNivel + 1) - 2)
+                                        }
+                                        // ARRIBA, EN EL WHILE PARA SUBIR DE NIVEL LOS HEROES, HAY VARIOS CAMBIOS EN EL REGISTRO, PERO ESTOS NO SON DEFINITIVOS.
+                                            // SIN EMBARGO ESTE SI ES EL ULTIMO CAMBIO QUE ASEGURA GUARDAR EL RESULTADO DEL COMBATE. Y ES EL QEU SE DEVUELVE AL App DEL FRONTEND.
+                                        jugador = await Jugador.findOneAndUpdate({"NOMBRE": req.body.NOMBRE}, {$set : {"MONEDAS": monedasFinal, "NIVEL": nuevoNivel, "EXPERIENCIA": experienciaJugador, "ACCION": accionJugador, "PROXCAMP": proxCampamentoJugador, "ZONA": zonaJugador}}, {new: true})
+                                    } else {
+                                        jugador = await Jugador.findOneAndUpdate({"NOMBRE": req.body.NOMBRE}, {$set : {"ACCION": accionJugador}}, {new: true})
+                                    }
 
-                                console.log("RESULTADOS")
-                                return res.json(
-                                    {"message": "RESULTADOS",
-                                    "datosJugador": jugador,
-                                    "lisrespuesta": lisrespuesta});
+                                    console.log("RESULTADOS")
+                                    return res.json(
+                                        {"message": "RESULTADOS",
+                                        "datosJugador": jugador,
+                                        "lisrespuesta": lisrespuesta});
+                                }
                             } else if (indiceGuardado == -1) {
                                 return res.json({"message": "FELICIDADES. SE TERMINO LA EXPEDICION, AHORA DEBE INICIAR UNA NUEVA"});
                             } else {
