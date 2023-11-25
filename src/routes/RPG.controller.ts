@@ -1070,6 +1070,11 @@ export const battle: RequestHandler = async (req,res) => {
                                 // const heroes = await Heroe.findOne({"NOMBRE": "Guerrero"}).exec();
                                 // lisEnemigos.push(JSON.parse(JSON.stringify(heroes)) as typeof heroes)
                                 
+                                console.log("RECUPERANDO DATOS")
+                                console.log(datosJson["ARRAYRUTA"])
+                                console.log(idCamp)
+                                console.log(lisEnemigos)
+
                                 let jugador;
                                 if (0 <= lisEnemigos.length) {
                                     jugador = await Jugador.findOneAndUpdate({"NOMBRE": req.body.NOMBRE}, {$set : {"ZONARUTA": [0, 0], "PROXCAMP": -1}}, {new: true})
