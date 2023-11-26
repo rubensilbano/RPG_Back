@@ -8,7 +8,6 @@ import Enemigo from "../models/Enemigo";
 
 // CREAR CUENTA JUGADOR
 export const createPlayer: RequestHandler = async (req,res) => {
-    console.log("USANDO LogReg.controller.ts")
     //  EN CASO DE QUE EL NOMBRE RECIBIDO EXISTA EN LOS REGISTROS, SE DEVUELVE UN JSON CON UN MENSAJE.
     const playerFound = await Jugador.findOne({NOMBRE: req.body.NOMBRE})
     if (playerFound)
@@ -23,7 +22,6 @@ export const createPlayer: RequestHandler = async (req,res) => {
 }
 // INGRESO A CUENTA JUGADOR
 export const login: RequestHandler = async (req, res)=>{
-    console.log("USANDO LogReg.controller.ts")
     try {
         const jugadores = await Jugador.findOne({"NOMBRE": req.body.NOMBRE}).exec();
         const datosString = JSON.stringify(jugadores)
@@ -84,9 +82,18 @@ export const login: RequestHandler = async (req, res)=>{
                 } else {
                     datosUsuario = jugadores
                 }
+                // ESTO ES PARA CARGAR LOS NOMBRES DE LOS HEROES EN UNA LISTA CONSTANTE, QUE SERA GUARDADA EN App
+                // DEBIDO A QUE SE NECESITA EN SQUAD, PERO REQUIERE LOS DATOS ANTES DE CARGAR DICHO COMPONENTE.
+                // A FUTURO DEBERIA ESTAR EN OTRO CONTROLLER.
+                const todosLosHeroes = await Heroe.find().exec();
+                let nombresHeroes = new Array<string>()
+                for (let i = 0; i < todosLosHeroes.length; i++) {
+                    nombresHeroes.push(todosLosHeroes[i]["NOMBRE"])
+                }
                 respuesta = {
                     "message": "Success",
-                    "datosUsuario": datosUsuario
+                    "datosUsuario": datosUsuario,
+                    "nombresHeroes": nombresHeroes
                 }
                 res.json(respuesta);
             } else{

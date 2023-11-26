@@ -82,15 +82,14 @@ export const login: RequestHandler = async (req, res)=>{
                 } else {
                     datosUsuario = jugadores
                 }
-
                 // ESTO ES PARA CARGAR LOS NOMBRES DE LOS HEROES EN UNA LISTA CONSTANTE, QUE SERA GUARDADA EN App
-                // DEBIDO A QUE SE NECESITA EN TAVERN, PERO REQUIERE LOS DATOS ANTES DE CARGAR DICHO COMPONENTE.
+                // DEBIDO A QUE SE NECESITA EN SQUAD, PERO REQUIERE LOS DATOS ANTES DE CARGAR DICHO COMPONENTE.
+                // A FUTURO DEBERIA ESTAR EN OTRO CONTROLLER.
                 const todosLosHeroes = await Heroe.find().exec();
                 let nombresHeroes = new Array<string>()
                 for (let i = 0; i < todosLosHeroes.length; i++) {
                     nombresHeroes.push(todosLosHeroes[i]["NOMBRE"])
                 }
-                
                 respuesta = {
                     "message": "Success",
                     "datosUsuario": datosUsuario,
