@@ -6,7 +6,7 @@ import { Router } from "express"
 const router = Router();
 
 // * IMPORTA TODO EL MODULO, Y LE ASIGNA UN APODO rpgCtrl
-import * as rpgCtrl from "./RPG.controller";
+import * as rpgCtrl from "../controllers/RPG.controller";
 
 // UNA MISMA RUTA PUEDE TENER DOS CONTROLADORES DISTINTOS.
     // SI ESTOS SON DIFERENCIADOS POR LA CANTIDAD DE ARGUMENTOS/PROPS, O EL METODO HTTP

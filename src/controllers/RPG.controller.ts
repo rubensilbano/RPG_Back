@@ -1,10 +1,10 @@
-// ESTE ES UN MANEJADOR PARA LAS RUTAS DE LAS PETICIONES, A LOS OBJETOS VIDEO.
+// ESTE ES UN MANEJADOR PARA LAS RUTAS DE LAS PETICIONES ENVIADAS DESDE EL FRONTEND.
     //ESTA ES LA ESPECIFICACION E IMPLEMENTACION A LAS RUTAS
 import { RequestHandler } from "express"
 // PERMITE MANEJAR FUNCIONES ASINCRONAS CON EXPRESS
-import Jugador from "./Jugador";
-import Heroe from "./Heroe";
-import Enemigo from "./Enemigo";
+import Jugador from "../models/Jugador";
+import Heroe from "../models/Heroe";
+import Enemigo from "../models/Enemigo";
 
 // CREAR CUENTA JUGADOR
 export const createPlayer: RequestHandler = async (req,res) => {
@@ -82,9 +82,19 @@ export const login: RequestHandler = async (req, res)=>{
                 } else {
                     datosUsuario = jugadores
                 }
+
+                // ESTO ES PARA CARGAR LOS NOMBRES DE LOS HEROES EN UNA LISTA CONSTANTE, QUE SERA GUARDADA EN App
+                // DEBIDO A QUE SE NECESITA EN TAVERN, PERO REQUIERE LOS DATOS ANTES DE CARGAR DICHO COMPONENTE.
+                const todosLosHeroes = await Heroe.find().exec();
+                let nombresHeroes = new Array<string>()
+                for (let i = 0; i < todosLosHeroes.length; i++) {
+                    nombresHeroes.push(todosLosHeroes[i]["NOMBRE"])
+                }
+                
                 respuesta = {
                     "message": "Success",
-                    "datosUsuario": datosUsuario
+                    "datosUsuario": datosUsuario,
+                    "nombresHeroes": nombresHeroes
                 }
                 res.json(respuesta);
             } else{
@@ -133,6 +143,11 @@ export const login: RequestHandler = async (req, res)=>{
     }
 }
 */
+
+
+// SI EL RECORTE FUNCIONO BIEN, ENTONCES PODRIA BORRAR createPlayer Y login
+
+
 function getFinalCost(cantidad: number, indice: number) {
     // CALCULA Y DEVUELVE EL COSTO, SEGUN LOS HEROES OBTENIDOS
     const cost = [1000, 500, 300, 1000, 500, 300, 1000, 500, 300, 1000, 500, 300, 1000, 500, 300, 1000, 500, 300, 1000, 500, 300, 1000, 500, 300]
