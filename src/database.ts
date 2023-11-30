@@ -34,7 +34,6 @@ import { hostname } from "os";
             `mongodb://${config.MONGO_USER}:${config.MONGO_PASSWORD}@${config.MONGO_HOST}/${config.MONGO_DATABASE}`,
             mongooseOptions
         );
-        
         console.log('Base de datos conectada', db.connection.name);
     } catch (error) {
         console.error(error);

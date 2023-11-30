@@ -1,10 +1,6 @@
-// ESTE ES UN MANEJADOR PARA LAS RUTAS DE LAS PETICIONES ENVIADAS DESDE EL FRONTEND.
-    //ESTA ES LA ESPECIFICACION E IMPLEMENTACION A LAS RUTAS
+// ENDPOINTS PARA EL REGISTRO, E INICIO DE SESION DE JUGADORES
 import { RequestHandler } from "express"
-// PERMITE MANEJAR FUNCIONES ASINCRONAS CON EXPRESS
 import Jugador from "../models/Jugador";
-import Heroe from "../models/Heroe";
-import Enemigo from "../models/Enemigo";
 
 // CREAR CUENTA JUGADOR
 export const createPlayer: RequestHandler = async (req,res) => {
@@ -82,26 +78,17 @@ export const login: RequestHandler = async (req, res)=>{
                 } else {
                     datosUsuario = jugadores
                 }
-                // ESTO ES PARA CARGAR LOS NOMBRES DE LOS HEROES EN UNA LISTA CONSTANTE, QUE SERA GUARDADA EN App
-                // DEBIDO A QUE SE NECESITA EN SQUAD, PERO REQUIERE LOS DATOS ANTES DE CARGAR DICHO COMPONENTE.
-                // A FUTURO DEBERIA ESTAR EN OTRO CONTROLLER.
-                const todosLosHeroes = await Heroe.find().exec();
-                let nombresHeroes = new Array<string>()
-                for (let i = 0; i < todosLosHeroes.length; i++) {
-                    nombresHeroes.push(todosLosHeroes[i]["NOMBRE"])
-                }
                 respuesta = {
                     "message": "Success",
-                    "datosUsuario": datosUsuario,
-                    "nombresHeroes": nombresHeroes
+                    "datosUsuario": datosUsuario
                 }
                 res.json(respuesta);
             } else{
-                res.json({"message": "Wrong password"});
+                res.json({"message": "User does not exist or Wrong password"});
             }
         } else {
             // SI EL USUARIO NO EXISTE
-            res.json({"message": "No records found!"});
+            res.json({"message": "User does not exist or Wrong password"});
         }
     } catch (error) {
         res.json(error)
