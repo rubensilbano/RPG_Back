@@ -523,7 +523,7 @@ export const battle: RequestHandler = async (req,res) => {
                     }
                     // GUARDANDO EXP PARA CADA HEROE EN EL ESCUADRON
                     for (let i = 0; i < datosJson["ESCUADRON"].length; i++) {
-                        if (parseInt(datosJson["ESCUADRON"][i]) > 0) {
+                        if ((parseInt(datosJson["ESCUADRON"][i]) > 0) && (datosJson["HEROE" + datosJson["ESCUADRON"][i]]["NIVEL"] < 30)) {
                             // SUBIR DE NIVEL CADA HEROE EN EL ESCUADRON
                             let nuevoNivel = datosJson["HEROE" + datosJson["ESCUADRON"][i]]["NIVEL"]
                             let expNecesaria = 50 * (nuevoNivel**2 + nuevoNivel - 2)
@@ -542,12 +542,14 @@ export const battle: RequestHandler = async (req,res) => {
                         }
                     }
                     // SUBIR DE NIVEL JUGADOR
-                    let nuevoNivel = datosJson["NIVEL"]
-                    let expNecesaria = 50 * ((nuevoNivel + 1)**2 + (nuevoNivel + 1) - 2)
-                    while (experienciaJugador >= expNecesaria) {
-                        nuevoNivel += 1
-                        experienciaJugador = experienciaJugador - expNecesaria
-                        expNecesaria = 50 * ((nuevoNivel + 1)**2 + (nuevoNivel + 1) - 2)
+                    if (datosJson["NIVEL"] < 100) {
+                        let nuevoNivel = datosJson["NIVEL"]
+                        let expNecesaria = 50 * ((nuevoNivel + 1)**2 + (nuevoNivel + 1) - 2)
+                        while (experienciaJugador >= expNecesaria) {
+                            nuevoNivel += 1
+                            experienciaJugador = experienciaJugador - expNecesaria
+                            expNecesaria = 50 * ((nuevoNivel + 1)**2 + (nuevoNivel + 1) - 2)
+                        }
                     }
                     // ARRIBA, EN EL WHILE PARA SUBIR DE NIVEL LOS HEROES, HAY VARIOS CAMBIOS EN EL REGISTRO, PERO ESTOS NO SON DEFINITIVOS.
                         // SIN EMBARGO ESTE SI ES EL ULTIMO CAMBIO QUE ASEGURA GUARDAR EL RESULTADO DEL COMBATE. Y ES EL QEU SE DEVUELVE AL App DEL FRONTEND.
@@ -639,6 +641,8 @@ function calcularAtributosHeroes(lisIndices: any, datosJson: any, todosLosHeroes
     let lisAtributos = new Array<any>()
     for (let index = 0; index < lisIndices.length; index++) {
         if (lisIndices[index] > 0) {
+            // const nivelMaximo = 100
+            const nivelMaximo = 30
             const nivel = parseInt(datosJson["HEROE" + lisIndices[index]]["NIVEL"])
             // AHORA CON LOS NIVELES, CALCULAR LOS ATRIBUTOS FINALES
             let sanador = ((13 <= lisIndices[index]) && (lisIndices[index] <= 15) ? true : false)
@@ -646,30 +650,30 @@ function calcularAtributosHeroes(lisIndices: any, datosJson: any, todosLosHeroes
             let nombre = JSON.parse(JSON.stringify(heroeActual))["NOMBRE"]
             const ataqueMaximo = JSON.parse(JSON.stringify(heroeActual))["ATAQUEMAX"]
             const ataqueMinimo = JSON.parse(JSON.stringify(heroeActual))["ATAQUEMIN"]
-            let ataque = (((ataqueMaximo - ataqueMinimo) / 100) * nivel) + ataqueMinimo
+            let ataque = (((ataqueMaximo - ataqueMinimo) / nivelMaximo) * nivel) + ataqueMinimo
             const defensaMaximo = JSON.parse(JSON.stringify(heroeActual))["DEFENSAMAX"]
             const defensaMinimo = JSON.parse(JSON.stringify(heroeActual))["DEFENSAMIN"]
-            let defensa = (((defensaMaximo - defensaMinimo) / 100) * nivel) + defensaMinimo
+            let defensa = (((defensaMaximo - defensaMinimo) / nivelMaximo) * nivel) + defensaMinimo
             const vidaMaximo = JSON.parse(JSON.stringify(heroeActual))["VIDAMAX"]
             const vidaMinimo = JSON.parse(JSON.stringify(heroeActual))["VIDAMIN"]
-            let vidatotal = (((vidaMaximo - vidaMinimo) / 100) * nivel) + vidaMinimo
+            let vidatotal = (((vidaMaximo - vidaMinimo) / nivelMaximo) * nivel) + vidaMinimo
             const regenMaximo = JSON.parse(JSON.stringify(heroeActual))["REGENMAX"]
             const regenMinimo = JSON.parse(JSON.stringify(heroeActual))["REGENMIN"]
-            let regeneracion = (((regenMaximo - regenMinimo) / 100) * nivel) + regenMinimo
+            let regeneracion = (((regenMaximo - regenMinimo) / nivelMaximo) * nivel) + regenMinimo
             // RECORDAR QUE LA CADENCIA DECRECE A MEDIDA QUE SUBE DE NIVEL
             const cadenciaMaximo = JSON.parse(JSON.stringify(heroeActual))["CADENCIAMAX"]
             const cadenciaMinimo = JSON.parse(JSON.stringify(heroeActual))["CADENCIAMIN"]
-            let cadencia = (((cadenciaMaximo - cadenciaMinimo) / 100) * (100 - nivel)) + cadenciaMinimo
+            let cadencia = (((cadenciaMaximo - cadenciaMinimo) / nivelMaximo) * (nivelMaximo - nivel)) + cadenciaMinimo
             let proxAtaque = cadencia / 2
             const criticoMaximo = JSON.parse(JSON.stringify(heroeActual))["CRITICOMAX"]
             const criticoMinimo = JSON.parse(JSON.stringify(heroeActual))["CRITICOMIN"]
-            let critico = (((criticoMaximo - criticoMinimo) / 100) * nivel) + criticoMinimo
+            let critico = (((criticoMaximo - criticoMinimo) / nivelMaximo) * nivel) + criticoMinimo
             const evasionMaximo = JSON.parse(JSON.stringify(heroeActual))["EVASIONMAX"]
             const evasionMinimo = JSON.parse(JSON.stringify(heroeActual))["EVASIONMIN"]
-            let evasion = (((evasionMaximo - evasionMinimo) / 100) * nivel) + evasionMinimo
+            let evasion = (((evasionMaximo - evasionMinimo) / nivelMaximo) * nivel) + evasionMinimo
             const aturdirMaximo = JSON.parse(JSON.stringify(heroeActual))["ATURDIRMAX"]
             const aturdirMinimo = JSON.parse(JSON.stringify(heroeActual))["ATURDIRMIN"]
-            let aturdir = (((aturdirMaximo - aturdirMinimo) / 100) * nivel) + aturdirMinimo
+            let aturdir = (((aturdirMaximo - aturdirMinimo) / nivelMaximo) * nivel) + aturdirMinimo
             const jsonHeroe = {
                 "SANADOR": sanador,
                 "NOMBRE": nombre,
