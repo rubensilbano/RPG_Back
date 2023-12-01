@@ -532,6 +532,9 @@ export const battle: RequestHandler = async (req,res) => {
                                 nuevoNivel += 1
                                 experienciaHeroe = experienciaHeroe - expNecesaria
                                 expNecesaria = 50 * (nuevoNivel**2 + nuevoNivel - 2)
+                                if (nuevoNivel == 30) {
+                                    experienciaHeroe = 0
+                                }
                             }
                             const heroeJson = {
                                 "NIVEL": nuevoNivel,
@@ -542,13 +545,16 @@ export const battle: RequestHandler = async (req,res) => {
                         }
                     }
                     // SUBIR DE NIVEL JUGADOR
+                    let nuevoNivel = datosJson["NIVEL"]
                     if (datosJson["NIVEL"] < 100) {
-                        let nuevoNivel = datosJson["NIVEL"]
                         let expNecesaria = 50 * ((nuevoNivel + 1)**2 + (nuevoNivel + 1) - 2)
                         while (experienciaJugador >= expNecesaria) {
                             nuevoNivel += 1
                             experienciaJugador = experienciaJugador - expNecesaria
                             expNecesaria = 50 * ((nuevoNivel + 1)**2 + (nuevoNivel + 1) - 2)
+                            if (nuevoNivel == 100) {
+                                experienciaJugador = 0
+                            }
                         }
                     }
                     // ARRIBA, EN EL WHILE PARA SUBIR DE NIVEL LOS HEROES, HAY VARIOS CAMBIOS EN EL REGISTRO, PERO ESTOS NO SON DEFINITIVOS.
