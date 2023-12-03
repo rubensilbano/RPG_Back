@@ -69,12 +69,7 @@ export const getRoute: RequestHandler = async (req,res) => {
         // ESTO PARA EL METODO POST
         const idZona = parseInt(req.body.zone);
         const idRuta = parseInt(req.body.route);
-
-        console.log(idZona)
-        console.log((idZona > 0))
-        console.log((idZona < 11))
-        console.log((idZona > 0) && (idZona < 11))
-
+        
         if ((idZona > 0) && (idZona < 11)) {
             if ((idRuta > 0) && (idRuta < 6)) {
                 const todosLosEnemigos = await Enemigo.find().exec();
@@ -97,13 +92,16 @@ export const getRoute: RequestHandler = async (req,res) => {
                 */
                 // POR AHORA USO LA MISMA BASE DE DATOS
                 const jugador = await Jugador.findOneAndUpdate({"NOMBRE": req.body.NOMBRE}, {$set : {"ZONARUTA": [idZona, idRuta], "ARRAYRUTA": lisEnemigosRuta, "PROXCAMP": 0}}, {new: true})
+                console.log("BACKEND RESPONDIO BIEN")
                 return res.json(
                     {"message": "CAMPAMENTOS GENERADOS",
                     "datosJugador": jugador});
             } else {
+                console.log("BACKEND RUTA INEXISTENTE")
                 return res.json({"message": "INDICE DE RUTA INEXISTENTE"});
             }
         } else {
+            console.log("BACKEND ZONA INEXISTENTE")
             return res.json({"message": "INDICE DE ZONA INEXISTENTE"});
         }
     } catch (error) {
