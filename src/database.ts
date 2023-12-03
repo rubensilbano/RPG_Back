@@ -10,7 +10,7 @@ import { hostname } from "os";
     // SIN NECESIDAD DE SER LLAMADA DE FORMA EXPLICITA.
 // NO EXPLICO SI ESTE COMPORTAMIENTO ES EXCLUSIVO DE TS, O SI INCLUSO JS LO TIENE.
 // METODO DE FAZT. FUNCIONO EN LOCAL, PERO NO EN DEPLOY
-
+/*
 (async () => {
     try {
         // AQUI SE PUEDEN ESPECIFICAR OPCIONES PARA LA CONEXION DE MONGOOSE
@@ -39,12 +39,12 @@ import { hostname } from "os";
         console.error(error);
     }
 })()
-
+*/
 
 // METODO DE RAILWAY
 // mongoose.connect(process.env.MONGO_URL);
 // ESTE METODO REEMPLAZA EL NOMBRE DE LA BD POR EL PUERTO HTTP
-/*
+
 mongoose.connect(
     `mongodb://${config.MONGO_USER}:${config.MONGO_PASSWORD}@${config.MONGO_HOST}:${config.MONGO_PORT}`
 );
@@ -55,4 +55,3 @@ database.on(
 );
 database.once("open", () => console.log("✅ mongodb CONECTADA EN EL SERVIDOR", mongoose.connection.name));
 mongoose.Promise = Promise;
-*/
