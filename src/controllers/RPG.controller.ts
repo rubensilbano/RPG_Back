@@ -315,7 +315,7 @@ export const battle: RequestHandler = async (req,res) => {
         // ESTA FUNCION LEE: LA LISTA DE INDICES DE HEROES ESCOGIDOS,
         // LA COLECCION DE DATOS DEL JUGADOR(EN DONDE ESTAN LOS NIVELES),
         // Y LA COLECCION DE ATRIBUTOS MINIMOS Y MAXIMOS COMPLETA.
-            // Y CON ELLA CALCULA LOS ATRIBUTOS DE CADA UNIDAD
+            // Y CON ELLA CALCULA LOS ATRIBUTOS DE CADA HEROE
         lisUnidades = calcularAtributosHeroes(datosJson["ESCUADRON"], datosJson, todosLosHeroes)
 
         let puntosNecesarios = 1
@@ -354,30 +354,21 @@ export const battle: RequestHandler = async (req,res) => {
                 puntosNecesarios = 1
                 break;
         }
-        // GUARD CLAUSULE QUE EVALUA:
-        // QUE EL ESCUADRON NO ESTE VACIO,
+        // GUARD CLAUSULE CONJUNTO QUE EVALUA:
         // QUE EL JUGADOR TENGA LOS PUNTOS DE ACCION NECESARIOS
+        // QUE EL ESCUADRON NO ESTE VACIO
         // QUE LA ZONA ESTE FUERA DEL RANGO 1-10
         // QUE LA RUTA ESTE FUERA DEL RANGO 1-5
         // QUE EL CAMPAMENTO ESTE FUERA DEL RANGO 0-9
-        if (lisUnidades.length <= 0 || 
-            datosJson["ACCION"] < puntosNecesarios || 
-            ((idZona < 1) || (10 < idZona)) || 
-            ((idRuta < 1) || (5 < idRuta)) || 
-            ((idCamp < 0) || (9 < idCamp))) {
-            return null;
+        if (datosJson["ACCION"] < puntosNecesarios) {
+            return res.json({"message": "PUNTOS DE ACCION INSUFICIENTES. SE REQUIEREN " + datosJson["ACCION"] + "/" + puntosNecesarios});
+        } else if (lisUnidades.length <= 0) {
+            return res.json({"message": "ESCUADRON VACIO. SE REQUIERE AL MENOS UN HEROE"});
+        } else if(((idZona < 1) || (10 < idZona)) || 
+        ((idRuta < 1) || (5 < idRuta)) || 
+        ((idCamp < 0) || (9 < idCamp))) {
+            return res.json({"message": "COMBINACION (ZONA, RUTA, CAMPAMENTO) INEXISTENTE."});
         }
-
-        // COMENTAMOS ESTOS IF, COMO EMERGENCIA POR SI EL guard clauses FALLA
-        /*
-        if (0 <= lisUnidades.length) {
-            if ((idZona > 0) && (idZona < 11)) {
-                if ((idRuta > 0) && (idRuta < 6)) {
-                    if ((idCamp > -1) && (idCamp < 10)) {
-                        // AQUI ESTABA EL switch (idZona)
-                        if (datosJson["ACCION"] >= puntosNecesarios) {
-        */
-
 
         // indiceGuardado DEBERIA RECIBIRSE DESDE EL LOCAL STORAGE. POR AHORA LEE DE LA BD
         const indiceGuardado = datosJson["PROXCAMP"]
@@ -491,6 +482,7 @@ export const battle: RequestHandler = async (req,res) => {
                 lisrespuesta.push(enemigosIniciales)
                 let lisAux = new Array<any>()
                 if (lisrespuesta[0] == "VICTORIA") {
+                    // EN CASO DE VICTORIA, ADJUNTA LOS PUNTOS DE VIDA RESTANTES DE LOS HEROES
                     for (let index = 0; index < lisUnidades.length; index++) {
                         lisAux.push(lisUnidades[index].VIDAACTUAL.toFixed(2))
                     }
@@ -500,6 +492,7 @@ export const battle: RequestHandler = async (req,res) => {
                         ultimoIndice -= 1
                     }
                 } else {
+                    // EN CASO DE DERROTA, ADJUNTA LOS PUNTOS DE VIDA RESTANTES DE LOS ENEMIGOS
                     for (let index = 0; index < lisEnemigos.length; index++) {
                         lisAux.push(lisEnemigos[index].VIDAACTUAL.toFixed(2))
                     }
@@ -511,90 +504,77 @@ export const battle: RequestHandler = async (req,res) => {
                 }
                 lisrespuesta.push(lisAux)
                 // GUARDANDO LAS RECOMPENSAS
-                const monedasFinal = datosJson["MONEDAS"] + monedasRecompensa
-                let experienciaJugador = datosJson["EXPERIENCIA"] + experienciaRecompensa
+                let monedasFinal = datosJson["MONEDAS"]
                 let accionJugador = datosJson["ACCION"] - puntosNecesarios
+                let proxCampamentoJugador = indiceGuardado
+                let zonaJugador = datosJson["ZONA"]
                 if (lisrespuesta[0] == "VICTORIA") {
-                    let proxCampamentoJugador = indiceGuardado + 1
-                    let zonaJugador = datosJson["ZONA"]
+                    // EN CASO DE VICTORIA
+                    monedasFinal = datosJson["MONEDAS"] + monedasRecompensa
+                    proxCampamentoJugador = indiceGuardado + 1
                     if (proxCampamentoJugador > datosJson["ARRAYRUTA"].length - 1) {
-                        zonaJugador += 1
+                        if ((datosJson["ZONARUTA"][0] == datosJson["ZONA"]) && (datosJson["ZONA"] < 10)) {
+                            zonaJugador += 1
+                        }
                         proxCampamentoJugador = -1
                     }
-                    // GUARDANDO EXP PARA CADA HEROE EN EL ESCUADRON
-                    for (let i = 0; i < datosJson["ESCUADRON"].length; i++) {
-                        if ((parseInt(datosJson["ESCUADRON"][i]) > 0) && (datosJson["HEROE" + datosJson["ESCUADRON"][i]]["NIVEL"] < 30)) {
-                            // SUBIR DE NIVEL CADA HEROE EN EL ESCUADRON
-                            let nuevoNivel = datosJson["HEROE" + datosJson["ESCUADRON"][i]]["NIVEL"]
-                            let expNecesaria = 50 * (nuevoNivel**2 + nuevoNivel - 2)
-                            let experienciaHeroe = datosJson["HEROE" + datosJson["ESCUADRON"][i]]["EXPERIENCIA"] + experienciaRecompensa
-                            while (experienciaHeroe >= expNecesaria) {
-                                nuevoNivel += 1
-                                experienciaHeroe = experienciaHeroe - expNecesaria
-                                expNecesaria = 50 * (nuevoNivel**2 + nuevoNivel - 2)
-                                if (nuevoNivel == 30) {
-                                    experienciaHeroe = 0
-                                }
-                            }
-                            const heroeJson = {
-                                "NIVEL": nuevoNivel,
-                                "EXPERIENCIA": experienciaHeroe,
-                                "OBJETOS": [0, 0, 0, 0, 0]
-                            }
-                            await Jugador.findOneAndUpdate({"NOMBRE": req.body.NOMBRE}, {$set : {["HEROE" + datosJson["ESCUADRON"][i]]: heroeJson}}, {new: true})
-                        }
-                    }
-                    // SUBIR DE NIVEL JUGADOR
-                    let nuevoNivel = datosJson["NIVEL"]
-                    if (datosJson["NIVEL"] < 100) {
-                        let expNecesaria = 50 * ((nuevoNivel + 1)**2 + (nuevoNivel + 1) - 2)
-                        while (experienciaJugador >= expNecesaria) {
-                            nuevoNivel += 1
-                            experienciaJugador = experienciaJugador - expNecesaria
-                            expNecesaria = 50 * ((nuevoNivel + 1)**2 + (nuevoNivel + 1) - 2)
-                            if (nuevoNivel == 100) {
-                                experienciaJugador = 0
-                            }
-                        }
-                    }
-                    // ARRIBA, EN EL WHILE PARA SUBIR DE NIVEL LOS HEROES, HAY VARIOS CAMBIOS EN EL REGISTRO, PERO ESTOS NO SON DEFINITIVOS.
-                        // SIN EMBARGO ESTE SI ES EL ULTIMO CAMBIO QUE ASEGURA GUARDAR EL RESULTADO DEL COMBATE. Y ES EL QEU SE DEVUELVE AL App DEL FRONTEND.
-                    jugador = await Jugador.findOneAndUpdate({"NOMBRE": req.body.NOMBRE}, {$set : {"MONEDAS": monedasFinal, "NIVEL": nuevoNivel, "EXPERIENCIA": experienciaJugador, "ACCION": accionJugador, "PROXCAMP": proxCampamentoJugador, "ZONA": zonaJugador}}, {new: true})
                 } else {
-                    jugador = await Jugador.findOneAndUpdate({"NOMBRE": req.body.NOMBRE}, {$set : {"ACCION": accionJugador}}, {new: true})
+                    // EN CASO DE DERROTA
+                    monedasFinal = datosJson["MONEDAS"] + Math.floor(monedasRecompensa / 2)
+                    experienciaRecompensa = Math.floor(experienciaRecompensa / 2)
                 }
-
+                // GUARDANDO EXP PARA CADA HEROE EN EL ESCUADRON
+                for (let i = 0; i < datosJson["ESCUADRON"].length; i++) {
+                    if ((parseInt(datosJson["ESCUADRON"][i]) > 0) && (datosJson["HEROE" + datosJson["ESCUADRON"][i]]["NIVEL"] < 30)) {
+                        // SUBIR DE NIVEL CADA HEROE EN EL ESCUADRON
+                        let nuevoNivel = datosJson["HEROE" + datosJson["ESCUADRON"][i]]["NIVEL"]
+                        let expNecesaria = 50 * (nuevoNivel**2 + nuevoNivel - 2)
+                        let experienciaHeroe = datosJson["HEROE" + datosJson["ESCUADRON"][i]]["EXPERIENCIA"] + experienciaRecompensa
+                        while (experienciaHeroe >= expNecesaria) {
+                            nuevoNivel += 1
+                            experienciaHeroe = experienciaHeroe - expNecesaria
+                            expNecesaria = 50 * (nuevoNivel**2 + nuevoNivel - 2)
+                            if (nuevoNivel == 30) {
+                                experienciaHeroe = 0
+                            }
+                        }
+                        const heroeJson = {
+                            "NIVEL": nuevoNivel,
+                            "EXPERIENCIA": experienciaHeroe,
+                            "OBJETOS": [0, 0, 0, 0, 0]
+                        }
+                        // ESTOS CAMBIOS EN EL REGISTRO SON INDIVIDUALES, MAS NO SON DEFINITIVOS.
+                        await Jugador.findOneAndUpdate({"NOMBRE": req.body.NOMBRE}, {$set : {["HEROE" + datosJson["ESCUADRON"][i]]: heroeJson}}, {new: true})
+                    }
+                }
+                // SUBIR DE NIVEL JUGADOR
+                let experienciaJugador = datosJson["EXPERIENCIA"] + experienciaRecompensa
+                let nuevoNivel = datosJson["NIVEL"]
+                if (datosJson["NIVEL"] < 100) {
+                    let expNecesaria = 50 * ((nuevoNivel + 1)**2 + (nuevoNivel + 1) - 2)
+                    while (experienciaJugador >= expNecesaria) {
+                        nuevoNivel += 1
+                        experienciaJugador = experienciaJugador - expNecesaria
+                        expNecesaria = 50 * ((nuevoNivel + 1)**2 + (nuevoNivel + 1) - 2)
+                        if (nuevoNivel == 100) {
+                            experienciaJugador = 0
+                        }
+                    }
+                }
+                // ESTE SI ES EL ULTIMO CAMBIO QUE ASEGURA GUARDAR EL RESULTADO DEL COMBATE.
+                    // Y ES EL QUE SE DEVUELVE AL App DEL FRONTEND.
+                jugador = await Jugador.findOneAndUpdate({"NOMBRE": req.body.NOMBRE}, {$set : {"MONEDAS": monedasFinal, "NIVEL": nuevoNivel, "EXPERIENCIA": experienciaJugador, "ACCION": accionJugador, "PROXCAMP": proxCampamentoJugador, "ZONA": zonaJugador}}, {new: true})
+                
                 console.log("RESULTADOS")
+                
                 return res.json(
                     {"message": "RESULTADOS",
                     "datosJugador": jugador,
                     "lisrespuesta": lisrespuesta});
             }
-        } else if (indiceGuardado == -1) {
-            return res.json({"message": "FELICIDADES. SE TERMINO LA EXPEDICION, AHORA DEBE INICIAR UNA NUEVA"});
         } else {
-            return res.json({"message": "INDICE DE CAMPAMENTO ERRONEO, DISPONIBLE EL: " + indiceGuardado});
+            return res.json({"message": "INDICE DE CAMPAMENTO NO COINCIDE."});
         }
-
-
-                        // ESTOS SON LOS 5 ELSE, DE LOS 5 IF QUE COMENTAMOS
-                        /*
-                        } else {
-                            return res.json({"message": "PUNTOS DE ACCION INSUFICIENTES: " + datosJson["ACCION"] + "/" + puntosNecesarios});
-                        }
-                    } else {
-                        return res.json({"message": "INDICE DE CAMPAMENTO INEXISTENTE"});
-                    }
-                } else {
-                    return res.json({"message": "INDICE DE RUTA INEXISTENTE"});
-                }
-            } else {
-                return res.json({"message": "INDICE DE ZONA INEXISTENTE"});
-            }
-        } else {
-            return res.json({"message": "EL ESCUADRON NO POSEE HEROES!!!"});
-        }
-        */
     } catch (error) {
         res.json(error)
     }

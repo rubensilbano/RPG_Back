@@ -29,7 +29,7 @@ function getFinalCost(cantidad: number, indice: number) {
     const cost = [1000, 500, 300, 1000, 500, 300, 1000, 500, 300, 1000, 500, 300, 1000, 500, 300, 1000, 500, 300, 1000, 500, 300, 1000, 500, 300]
     const costoBase = cost[indice - 1]
     const costo = costoBase * (1 + (cantidad * 0.2))
-    return costo;
+    return Math.floor(costo);
 }
 // EJECUTA LA COMPRA DEL HEROE PASADO COMO PARAMETRO
 export const buyHero: RequestHandler = async (req,res) => {
