@@ -69,6 +69,8 @@ export const getRoute: RequestHandler = async (req,res) => {
         // ESTO PARA EL METODO POST
         const idZona = parseInt(req.body.zone);
         const idRuta = parseInt(req.body.route);
+        
+        console.log(idZona)
 
         if ((idZona > 0) && (idZona < 11)) {
             if ((idRuta > 0) && (idRuta < 6)) {
