@@ -16,7 +16,8 @@ export const createPlayer: RequestHandler = async (req,res) => {
     const savedPlayer = await player.save()
     res.json('NUEVO JUGADOR CREADO' + savedPlayer.NOMBRE);
 }
-// INGRESO A CUENTA JUGADOR
+// INGRESO A CUENTA JUGADOR.
+    // TAMBIEN REVISA SI ES EL PRIMER ACCESO DEL DIA, PARA RENOVAR LA LISTA DE HEROES EN LA TABERNA
 export const login: RequestHandler = async (req, res)=>{
     try {
         const jugadores = await Jugador.findOne({"NOMBRE": req.body.NOMBRE}).exec();

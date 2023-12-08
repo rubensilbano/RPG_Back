@@ -391,12 +391,18 @@ export const battle: RequestHandler = async (req,res) => {
                 let TerminoBatalla = false
                 let lisrespuesta = new Array<any>()
                 let lisaux = new Array<any>()
+                let lisauxCuracion = new Array<any>()
                 let reloj = 0.0
                 let relojEntero = 1
                 let monedasRecompensa = 0
                 let experienciaRecompensa = 0
                 let unidadesIniciales = new Array<any>()
                 let enemigosIniciales = new Array<any>()
+                let lisAtaques = new Array<any>()
+                let unidadesEstadisticas = new Array<number>()
+                let enemigosEstadisticas = new Array<number>()
+                unidadesEstadisticas = [0, 0, 0, 0]
+                enemigosEstadisticas = [0, 0, 0, 0]
                 for (let index = 0; index < lisUnidades.length; index++) {
                     unidadesIniciales.push([lisUnidades[index].NOMBRE, 0, lisUnidades[index].VIDATOTAL.toFixed(2)])
                 }
@@ -418,12 +424,17 @@ export const battle: RequestHandler = async (req,res) => {
                                     // ES SIMILAR A atacarEliminar, PERO REQUIERE EL INDICE DEL SANADOR, Y EL reloj.
                                     // EN CASO DE NO ENCONTRAR NI UN OBJETIVO, POSPONE LA MITAD DE TIEMPO.
                                     // EL "PROXATAQUE" SE ASIGNA DENTRO DE LA FUNCION
-                                    lisUnidades = buscarCurar(index, lisUnidades, reloj);
+                                    lisauxCuracion = buscarCurar(index, lisUnidades, reloj, true, lisAtaques, unidadesEstadisticas);
+                                    lisUnidades = lisauxCuracion[0]
+                                    lisAtaques = lisauxCuracion[1]
+                                    unidadesEstadisticas = lisauxCuracion[2]
                                 } else {
-                                    lisaux = atacarEliminar(lisUnidades[index], lisEnemigos, true, idCamp);
+                                    lisaux = atacarEliminar(lisUnidades[index], lisEnemigos, true, idCamp, lisAtaques, unidadesEstadisticas, enemigosEstadisticas);
                                     monedasRecompensa += parseInt(lisaux[0])
                                     experienciaRecompensa += parseInt(lisaux[1])
                                     lisEnemigos = lisaux[2]
+                                    lisAtaques = lisaux[3]
+                                    unidadesEstadisticas = lisaux[4]
                                     lisUnidades[index]["PROXATAQUE"] = reloj + lisUnidades[index]["CADENCIA"]
                                     if (lisEnemigos.length <= 0) {
                                         TerminoBatalla = true
@@ -441,8 +452,10 @@ export const battle: RequestHandler = async (req,res) => {
                         for (let index = 0; index < lisEnemigos.length; index++) {
                             if (lisUnidades.length > 0) {
                                 if (reloj >= lisEnemigos[index]["PROXATAQUE"]) {
-                                    lisaux = atacarEliminar(lisEnemigos[index], lisUnidades, false, idCamp);
+                                    lisaux = atacarEliminar(lisEnemigos[index], lisUnidades, false, idCamp, lisAtaques, enemigosEstadisticas, unidadesEstadisticas);
                                     lisUnidades = lisaux[2]
+                                    lisAtaques = lisaux[3]
+                                    enemigosEstadisticas = lisaux[4]
                                     lisEnemigos[index]["PROXATAQUE"] = reloj + lisEnemigos[index]["CADENCIA"]
                                     if (lisUnidades.length <= 0) {
                                         TerminoBatalla = true
@@ -510,7 +523,6 @@ export const battle: RequestHandler = async (req,res) => {
                 let zonaJugador = datosJson["ZONA"]
                 if (lisrespuesta[0] == "VICTORIA") {
                     // EN CASO DE VICTORIA
-                    monedasFinal = datosJson["MONEDAS"] + monedasRecompensa
                     proxCampamentoJugador = indiceGuardado + 1
                     if (proxCampamentoJugador > datosJson["ARRAYRUTA"].length - 1) {
                         if ((datosJson["ZONARUTA"][0] == datosJson["ZONA"]) && (datosJson["ZONA"] < 10)) {
@@ -520,24 +532,29 @@ export const battle: RequestHandler = async (req,res) => {
                     }
                 } else {
                     // EN CASO DE DERROTA
-                    monedasFinal = datosJson["MONEDAS"] + Math.floor(monedasRecompensa / 2)
+                    monedasRecompensa = Math.floor(monedasRecompensa / 2)
                     experienciaRecompensa = Math.floor(experienciaRecompensa / 2)
                 }
+                monedasFinal = datosJson["MONEDAS"] + monedasRecompensa
+                let lisExpEscuadron = new Array<any>()
                 // GUARDANDO EXP PARA CADA HEROE EN EL ESCUADRON
                 for (let i = 0; i < datosJson["ESCUADRON"].length; i++) {
                     if ((parseInt(datosJson["ESCUADRON"][i]) > 0) && (datosJson["HEROE" + datosJson["ESCUADRON"][i]]["NIVEL"] < 30)) {
                         // SUBIR DE NIVEL CADA HEROE EN EL ESCUADRON
                         let nuevoNivel = datosJson["HEROE" + datosJson["ESCUADRON"][i]]["NIVEL"]
+                        let subioNivel = false
                         let expNecesaria = 50 * (nuevoNivel**2 + nuevoNivel - 2)
                         let experienciaHeroe = datosJson["HEROE" + datosJson["ESCUADRON"][i]]["EXPERIENCIA"] + experienciaRecompensa
                         while (experienciaHeroe >= expNecesaria) {
                             nuevoNivel += 1
+                            subioNivel = true
                             experienciaHeroe = experienciaHeroe - expNecesaria
                             expNecesaria = 50 * (nuevoNivel**2 + nuevoNivel - 2)
                             if (nuevoNivel == 30) {
                                 experienciaHeroe = 0
                             }
                         }
+                        lisExpEscuadron.push([experienciaHeroe, expNecesaria, nuevoNivel, subioNivel])
                         const heroeJson = {
                             "NIVEL": nuevoNivel,
                             "EXPERIENCIA": experienciaHeroe,
@@ -561,6 +578,14 @@ export const battle: RequestHandler = async (req,res) => {
                         }
                     }
                 }
+                // AÑADIENDO MONEDAS Y EXPERIENCIA PARA MOSTRAR EN EL FRONTEND
+                let lisRecompensas = new Array<number>()
+                lisRecompensas.push(monedasRecompensa)
+                lisRecompensas.push(experienciaRecompensa)
+                lisrespuesta.push(lisRecompensas)
+                lisrespuesta.push(lisExpEscuadron)
+                lisrespuesta.push(lisAtaques)
+                lisrespuesta.push([unidadesEstadisticas, enemigosEstadisticas])
                 // ESTE SI ES EL ULTIMO CAMBIO QUE ASEGURA GUARDAR EL RESULTADO DEL COMBATE.
                     // Y ES EL QUE SE DEVUELVE AL App DEL FRONTEND.
                 jugador = await Jugador.findOneAndUpdate({"NOMBRE": req.body.NOMBRE}, {$set : {"MONEDAS": monedasFinal, "NIVEL": nuevoNivel, "EXPERIENCIA": experienciaJugador, "ACCION": accionJugador, "PROXCAMP": proxCampamentoJugador, "ZONA": zonaJugador}}, {new: true})
@@ -579,10 +604,10 @@ export const battle: RequestHandler = async (req,res) => {
         res.json(error)
     }
 }
-function atacarEliminar(Atacante: any, lisRivales: any, atacanteHeroe: boolean, ruta: number) {
+function atacarEliminar(Atacante: any, lisRivales: any, atacanteHeroe: boolean, ruta: number, lisAtaques: any, lisAcumuladores: any, lisAcumuladoresRival: any) {
     // ESTA FUNCION ESCOGE EL ELEMENTO 0 EN LA LISTA DEL RIVAL, Y LE DESCUENTA VIDA.
         // TAMBIEN ELIMINA EL ELEMENTO 0, SI ESTE NO TIENE VIDA
-    // EVALUA SI atacanteHeroe ES TRUE, ENTONCES CALCULA LA RECOMPENSA EN MONEDAS Y LA ADJUNTA A LA RESPUESTA
+    // EVALUA SI atacanteHeroe ES TRUE, ENTONCES CALCULA LA RECOMPENSA EN MONEDASY EXP. ADJUNTA TODO A LA RESPUESTA
     let danioentrante = 0;
     let daniofinal = 0;
     const evasionaux = Math.floor(Math.random() * 100)
@@ -597,6 +622,7 @@ function atacarEliminar(Atacante: any, lisRivales: any, atacanteHeroe: boolean, 
         }
         if (lisRivales[0]["DEFENSA"] >= 0) {
             daniofinal = danioentrante * (1 - (lisRivales[0]["DEFENSA"] / (100.0 + lisRivales[0]["DEFENSA"])));
+            lisAcumuladoresRival[1] += danioentrante - daniofinal
         }
         else {
             daniofinal = danioentrante * (1 - (2 - (lisRivales[0]["DEFENSA"] / (100.0 + lisRivales[0]["DEFENSA"]))));
@@ -604,13 +630,28 @@ function atacarEliminar(Atacante: any, lisRivales: any, atacanteHeroe: boolean, 
         const aturdiraux = Math.floor(Math.random() * 100)
         if (aturdiraux <= Atacante["ATURDIR"]) {
             lisRivales[0]["PROXATAQUE"] += 1;
+            lisAcumuladoresRival[3] += 1;
         }
     }
+    let dañoCausado = lisRivales[0]["VIDAACTUAL"]
     lisRivales[0]["VIDAACTUAL"] -= daniofinal;
+    dañoCausado -= lisRivales[0]["VIDAACTUAL"]
+    lisAcumuladores[0] += dañoCausado
+
+    // AGREGANDO REGISTRO DE ATAQUES
+    let lisAtaquesAux = new Array<any>()
+    // ATACA HEROE O ATACA ENEMIGO
+    const esHeroe = atacanteHeroe ? "AH" : "AE"
+    lisAtaquesAux.push(esHeroe)
+    let palabra = Atacante["NOMBRE"] + "   causo " + dañoCausado.toFixed(2) + " en daño a   " + lisRivales[0]["NOMBRE"]
+    lisAtaquesAux.push(palabra)
+    lisAtaques.push(lisAtaquesAux)
+
     let lisRespuesta = new Array<any>()
     let monedasRecompensaActual = 0
     let experienciaRecompensaActual = 0
     if (lisRivales[0]["VIDAACTUAL"] <= 0) {
+        lisAtaques.push([esHeroe, lisRivales[0]["NOMBRE"] + " fue derrotado."])
         if (atacanteHeroe) {
             monedasRecompensaActual = sumarMonedas(lisRivales[0]["NIVEL"], ruta)
             experienciaRecompensaActual = sumarExperiencia(lisRivales[0]["NIVEL"], ruta)
@@ -620,6 +661,8 @@ function atacarEliminar(Atacante: any, lisRivales: any, atacanteHeroe: boolean, 
     lisRespuesta.push(monedasRecompensaActual)
     lisRespuesta.push(experienciaRecompensaActual)
     lisRespuesta.push(lisRivales)
+    lisRespuesta.push(lisAtaques)
+    lisRespuesta.push(lisAcumuladores)
     return lisRespuesta;
 }
 function calcularAtributosHeroes(lisIndices: any, datosJson: any, todosLosHeroes: any) {
@@ -715,7 +758,7 @@ function calcularAtributosEnemigos(lisIndices: any, todosLosEnemigos: any) {
     }
     return lisAtributos;
 }
-function buscarCurar(indiceSanador: number, lisAliados: any, reloj:number) {
+function buscarCurar(indiceSanador: number, lisAliados: any, reloj:number, atacanteHeroe: boolean, lisAtaques: any, lisAcumuladores: any) {
     // ESTA FUNCION BUSCA EL ELEMENTO CON MAYOR PORCENTAJE DE VIDA FALTANTE EN LA LISTA DE ALIADOS,
     // EN CASO DE NO EXISTIR, POSPONE SU ATAQUE LA MITAD DE TIEMPO.
     // PRIMERO BUSCAR OBJETIVO
@@ -730,22 +773,39 @@ function buscarCurar(indiceSanador: number, lisAliados: any, reloj:number) {
             }
         }        
     }
-    // DESPUES CURAR
+    // AHORA INTENTA CURAR
     if (indice >= 0) {
         let curacion = lisAliados[indiceSanador]["ATAQUE"]
         const criticoaux = Math.floor(Math.random() * 100)
         if (criticoaux <= lisAliados[indiceSanador]["CRITICO"]) {
             curacion *= 2;
         }
+        let vidaCurada = lisAliados[indice]["VIDAACTUAL"]
         lisAliados[indice]["VIDAACTUAL"] += curacion;
         if (lisAliados[indice]["VIDAACTUAL"] > lisAliados[indice]["VIDATOTAL"]) {
             lisAliados[indice]["VIDAACTUAL"] = lisAliados[indice]["VIDATOTAL"]
         }
+        vidaCurada = lisAliados[indice]["VIDAACTUAL"] - vidaCurada
         lisAliados[indiceSanador]["PROXATAQUE"] = reloj + lisAliados[indiceSanador]["CADENCIA"]
+        lisAcumuladores[2] += vidaCurada
+        
+        // AGREGANDO REGISTRO DE CURACIONES. SOLO APLICA SI EFECTIVAMENTE SE CURO A ALGUIEN.
+        let lisAtaquesAux = new Array<any>()
+        // ESTA CURANDO UN HEROE O ENEMIGO?
+        const esHeroe = atacanteHeroe ? "CH" : "CE"
+        lisAtaquesAux.push(esHeroe)
+        let palabra = lisAliados[indiceSanador]["NOMBRE"] + "   curo " + vidaCurada.toFixed(2) + " PV. a   " + lisAliados[indice]["NOMBRE"]
+        lisAtaquesAux.push(palabra)
+        lisAtaques.push(lisAtaquesAux)
+
     } else {
         lisAliados[indiceSanador]["PROXATAQUE"] = reloj + (lisAliados[indiceSanador]["CADENCIA"] / 2)
     }
-    return lisAliados;
+    let lisRespuesta = new Array<any>()
+    lisRespuesta.push(lisAliados)
+    lisRespuesta.push(lisAtaques)
+    lisRespuesta.push(lisAcumuladores)
+    return lisRespuesta;
 }
 function sumarMonedas(nivel: number, ruta: number) {
     // ESTA FUNCION CALCULA LA CANTIDAD DE MONEDAS GANADAS POR DERROTAR A UN ENEMIGO.

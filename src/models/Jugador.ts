@@ -20,122 +20,122 @@ const jugadorSchema = new Schema({
     HEROE1: {
         type: Object,
         trim: true,
-        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0]}
+        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0], "PUNTOSBATALLA": 0}
     },
     HEROE2: {
         type: Object,
         trim: true,
-        default: {"NIVEL": 1, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0]}
+        default: {"NIVEL": 1, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0], "PUNTOSBATALLA": 0}
     },
     HEROE3: {
         type: Object,
         trim: true,
-        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0]}
+        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0], "PUNTOSBATALLA": 0}
     },
     HEROE4: {
         type: Object,
         trim: true,
-        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0]}
+        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0], "PUNTOSBATALLA": 0}
     },
     HEROE5: {
         type: Object,
         trim: true,
-        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0]}
+        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0], "PUNTOSBATALLA": 0}
     },
     HEROE6: {
         type: Object,
         trim: true,
-        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0]}
+        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0], "PUNTOSBATALLA": 0}
     },
     HEROE7: {
         type: Object,
         trim: true,
-        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0]}
+        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0], "PUNTOSBATALLA": 0}
     },
     HEROE8: {
         type: Object,
         trim: true,
-        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0]}
+        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0], "PUNTOSBATALLA": 0}
     },
     HEROE9: {
         type: Object,
         trim: true,
-        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0]}
+        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0], "PUNTOSBATALLA": 0}
     },
     HEROE10: {
         type: Object,
         trim: true,
-        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0]}
+        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0], "PUNTOSBATALLA": 0}
     },
     HEROE11: {
         type: Object,
         trim: true,
-        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0]}
+        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0], "PUNTOSBATALLA": 0}
     },
     HEROE12: {
         type: Object,
         trim: true,
-        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0]}
+        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0], "PUNTOSBATALLA": 0}
     },
     HEROE13: {
         type: Object,
         trim: true,
-        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0]}
+        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0], "PUNTOSBATALLA": 0}
     },
     HEROE14: {
         type: Object,
         trim: true,
-        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0]}
+        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0], "PUNTOSBATALLA": 0}
     },
     HEROE15: {
         type: Object,
         trim: true,
-        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0]}
+        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0], "PUNTOSBATALLA": 0}
     },
     HEROE16: {
         type: Object,
         trim: true,
-        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0]}
+        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0], "PUNTOSBATALLA": 0}
     },
     HEROE17: {
         type: Object,
         trim: true,
-        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0]}
+        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0], "PUNTOSBATALLA": 0}
     },
     HEROE18: {
         type: Object,
         trim: true,
-        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0]}
+        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0], "PUNTOSBATALLA": 0}
     },
     HEROE19: {
         type: Object,
         trim: true,
-        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0]}
+        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0], "PUNTOSBATALLA": 0}
     },
     HEROE20: {
         type: Object,
         trim: true,
-        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0]}
+        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0], "PUNTOSBATALLA": 0}
     },
     HEROE21: {
         type: Object,
         trim: true,
-        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0]}
+        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0], "PUNTOSBATALLA": 0}
     },
     HEROE22: {
         type: Object,
         trim: true,
-        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0]}
+        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0], "PUNTOSBATALLA": 0}
     },
     HEROE23: {
         type: Object,
         trim: true,
-        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0]}
+        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0], "PUNTOSBATALLA": 0}
     },
     HEROE24: {
         type: Object,
         trim: true,
-        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0]}
+        default: {"NIVEL": 0, "EXPERIENCIA": 0, "OBJETOS": [0, 0, 0, 0, 0], "PUNTOSBATALLA": 0}
     },
     CANTIDAD: {
         type: Number,

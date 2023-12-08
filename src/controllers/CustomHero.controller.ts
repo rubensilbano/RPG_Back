@@ -51,10 +51,12 @@ export const buyHero: RequestHandler = async (req,res) => {
             if (arrayCopy[indice][1] <= datosJson["MONEDAS"]) {
                 // DESCUENTA LAS MONEDAS, PONE A NIVEL 1 EL HEROE COMPRADO, ELIMINA ESE ELEMENTO DEL ARRAY DE HEROES DISPONIBLES
                 const monedasRestantes = datosJson["MONEDAS"] - arrayCopy[indice][1]
+                const pbMinimos = [850, 720, 592, 846, 717, 589, 733, 622, 511, 774, 655, 538, 653, 553, 455, 617, 522, 429, 888, 753, 619, 776, 656, 539]
                 const heroeJson = {
                     "NIVEL": 1,
                     "EXPERIENCIA": 0,
-                    "OBJETOS": [0, 0, 0, 0, 0]
+                    "OBJETOS": [0, 0, 0, 0, 0],
+                    "PUNTOSBATALLA": pbMinimos[arrayCopy[indice][0] - 1]
                 }
                 let newArray = arrayCopy.filter((elemento:[Number, Number]) => elemento != arrayCopy[indice])
                 // MODIFICANDO newArray, PARA AUMENTAR LOS COSTOS POR LA NUEVA UNIDAD COMPRADA
