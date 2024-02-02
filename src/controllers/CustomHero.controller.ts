@@ -2,8 +2,11 @@
 import { RequestHandler } from "express"
 import Jugador from "../models/Jugador";
 import Heroe from "../models/Heroe";
+import Objeto from "../models/Objeto";
 
-// AL EJECUTAR MUESTRA UNA LISTA CON LOS NOMBRES DE LOS HEROES DISPONIBLES EN LA TABERNA
+// AL EJECUTAR DEVUELVE LA LISTA CON LOS HEROES DISPONIBLES EN LA TABERNA,
+    // PERO A CADA INDICE SE LE AGREGA EL NOMBRE
+    // [INDICE HEROE, COSTO MONEDAS, NOMBRE HEROE]
 export const getHeroNames: RequestHandler = async (req,res) => {
     try {
         const jugadores = await Jugador.findOne({"NOMBRE": req.body.NOMBRE}).exec();
@@ -56,7 +59,7 @@ export const buyHero: RequestHandler = async (req,res) => {
                     "NIVEL": 1,
                     "EXPERIENCIA": 0,
                     "OBJETOS": [0, 0, 0, 0, 0],
-                    "PUNTOSBATALLA": pbMinimos[arrayCopy[indice][0] - 1]
+                    "PUNTOSBATALLA": [pbMinimos[arrayCopy[indice][0] - 1], 0]
                 }
                 let newArray = arrayCopy.filter((elemento:[Number, Number]) => elemento != arrayCopy[indice])
                 // MODIFICANDO newArray, PARA AUMENTAR LOS COSTOS POR LA NUEVA UNIDAD COMPRADA
@@ -149,4 +152,97 @@ function heroeRepetido(indice: number, lista: any) {
         }
     }
     return respuesta;
+}
+
+// EL FRONTEND RECIBIRA LOS ATRIBUTOS BASE DEL HEROE SOLICITADO, SEGUN EL NIVEL
+export const getAttributes: RequestHandler = async (req,res) => {
+    try {
+        const heroe = await Heroe.findOne({"NOMBRE": req.body.NOMBRE}).exec();
+        const atributosHeroe = calcularAtributosUnSoloHeroe(heroe, req.body.NIVEL)
+        return res.json({
+            "message": "HEROE CALCULADO EXITOSAMENTE!!!",
+            "datosHeroe": atributosHeroe
+        });
+    } catch (error) {
+        res.json(error)
+    }
+}
+function calcularAtributosUnSoloHeroe(heroeActual: any, nivel: number) {
+    // ESTA FUNCION CALCULA LOS ATRIBUTOS DE UN SOLO HEROE
+        // NO CALCULA EXACTAMENTE TODOS LOS ATRIBUTOS NECESARIOS EN COMBATE.
+    // const nivelMaximo = 100
+    const nivelMaximo = 30
+    let nombre = JSON.parse(JSON.stringify(heroeActual))["NOMBRE"]
+    const ataqueMaximo = JSON.parse(JSON.stringify(heroeActual))["ATAQUEMAX"]
+    const ataqueMinimo = JSON.parse(JSON.stringify(heroeActual))["ATAQUEMIN"]
+    let ataque = (((ataqueMaximo - ataqueMinimo) / nivelMaximo) * nivel) + ataqueMinimo
+    const defensaMaximo = JSON.parse(JSON.stringify(heroeActual))["DEFENSAMAX"]
+    const defensaMinimo = JSON.parse(JSON.stringify(heroeActual))["DEFENSAMIN"]
+    let defensa = (((defensaMaximo - defensaMinimo) / nivelMaximo) * nivel) + defensaMinimo
+    const vidaMaximo = JSON.parse(JSON.stringify(heroeActual))["VIDAMAX"]
+    const vidaMinimo = JSON.parse(JSON.stringify(heroeActual))["VIDAMIN"]
+    let vidatotal = (((vidaMaximo - vidaMinimo) / nivelMaximo) * nivel) + vidaMinimo
+    const regenMaximo = JSON.parse(JSON.stringify(heroeActual))["REGENMAX"]
+    const regenMinimo = JSON.parse(JSON.stringify(heroeActual))["REGENMIN"]
+    let regeneracion = (((regenMaximo - regenMinimo) / nivelMaximo) * nivel) + regenMinimo
+    // RECORDAR QUE LA CADENCIA DECRECE A MEDIDA QUE SUBE DE NIVEL
+    const cadenciaMaximo = JSON.parse(JSON.stringify(heroeActual))["CADENCIAMAX"]
+    const cadenciaMinimo = JSON.parse(JSON.stringify(heroeActual))["CADENCIAMIN"]
+    let cadencia = (((cadenciaMaximo - cadenciaMinimo) / nivelMaximo) * (nivelMaximo - nivel)) + cadenciaMinimo
+    const criticoMaximo = JSON.parse(JSON.stringify(heroeActual))["CRITICOMAX"]
+    const criticoMinimo = JSON.parse(JSON.stringify(heroeActual))["CRITICOMIN"]
+    let critico = (((criticoMaximo - criticoMinimo) / nivelMaximo) * nivel) + criticoMinimo
+    const evasionMaximo = JSON.parse(JSON.stringify(heroeActual))["EVASIONMAX"]
+    const evasionMinimo = JSON.parse(JSON.stringify(heroeActual))["EVASIONMIN"]
+    let evasion = (((evasionMaximo - evasionMinimo) / nivelMaximo) * nivel) + evasionMinimo
+    const aturdirMaximo = JSON.parse(JSON.stringify(heroeActual))["ATURDIRMAX"]
+    const aturdirMinimo = JSON.parse(JSON.stringify(heroeActual))["ATURDIRMIN"]
+    let aturdir = (((aturdirMaximo - aturdirMinimo) / nivelMaximo) * nivel) + aturdirMinimo
+    const jsonHeroe = {
+        "NOMBRE": nombre,
+        "ATAQUE": ataque,
+        "DEFENSA": defensa,
+        "VIDA": vidatotal,
+        "REGENERACION": regeneracion,
+        "CADENCIA": cadencia,
+        "CRITICO": critico,
+        "EVASION": evasion,
+        "ATURDIR": aturdir
+    }
+    return jsonHeroe;
+}
+// EL FRONTEND RECIBIRA LA LISTA CON TODOS LOS OBJETOS, Y SUS ATRIBUTOS
+export const getObjects: RequestHandler = async (req,res) => {
+    try {
+        const objeto = await Objeto.find().exec();
+        return res.json({
+            "message": "LISTADO DE OBJETOS OBTENIDO",
+            "listado": objeto
+        });
+    } catch (error) {
+        res.json(error)
+    }
+}
+// GUARDA 3 CAMBIOS: INVENTARIO DEL HEROE ACTUAL, INVENTARIO DEL JUGADOR, SUMATORIA DE PB DE OBJETOS
+export const saveInventory: RequestHandler = async (req,res) => {
+    try {
+        const jugadores = await Jugador.findOne({"NOMBRE": req.body.NOMBRE}).exec();
+        const datosString = JSON.stringify(jugadores)
+        const datosJson = JSON.parse(datosString);
+        datosString
+        const indice = req.body.INDICEHEROE
+        const heroeJson = {
+            "NIVEL": datosJson["HEROE" + indice]["NIVEL"],
+            "EXPERIENCIA": datosJson["HEROE" + indice]["EXPERIENCIA"],
+            "OBJETOS": req.body.INVHEROE,
+            "PUNTOSBATALLA": [datosJson["HEROE" + indice]["PUNTOSBATALLA"][0], req.body.PBOBJETOS]
+        }
+        const jugador = await Jugador.findOneAndUpdate({"NOMBRE": req.body.NOMBRE}, {$set : {["HEROE" + indice]: heroeJson, "ARRAYOBJETOS": req.body.INVJUGADOR}}, {new: true})
+        return res.json({
+            "message": "DATOS GUARDADOS EXITOSAMENTE!!!",
+            "datosJugador": jugador
+        });
+    } catch (error) {
+        res.json(error)
+    }
 }

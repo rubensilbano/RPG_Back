@@ -3,8 +3,10 @@ import { RequestHandler } from "express"
 import Jugador from "../models/Jugador";
 import Heroe from "../models/Heroe";
 import Enemigo from "../models/Enemigo";
+import Objeto from "../models/Objeto";
 import arrayHeroes from "./Heroes.json";
 import arrayEnemigos from "./Enemigos.json";
+import arrayObjetos from "./Objetos.json";
 
 // AL EJECUTAR MUESTRA TODOS LOS REGISTROS DE JUGADORES.
 export const getAllPlayers: RequestHandler = async (req,res) => {
@@ -22,15 +24,19 @@ export const getAllPlayers: RequestHandler = async (req,res) => {
 export const respaldo: RequestHandler = async (req,res) => {
     try {
         const heroes = await Heroe.insertMany(
-                arrayHeroes
-            )
+            arrayHeroes
+        )
         const enemigos = await Enemigo.insertMany(
             arrayEnemigos
+        )
+        const objetos = await Objeto.insertMany(
+            arrayObjetos
         )
         return res.json({
         "message": "HEROES Y ENEMIGOS GENERADOS EXITOSAMENTE!!!",
         "heroes": heroes,
-        "enemigos": enemigos
+        "enemigos": enemigos,
+        "objetos": objetos
         });
     } catch (error) {
         res.json(error)

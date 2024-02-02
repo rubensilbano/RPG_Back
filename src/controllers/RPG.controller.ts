@@ -7,6 +7,7 @@ import { RequestHandler } from "express"
 import Jugador from "../models/Jugador";
 import Heroe from "../models/Heroe";
 import Enemigo from "../models/Enemigo";
+import Objeto from "../models/Objeto";
 
 // CONSULTA SI LA ZONA ELEGIDA ESTA DISPONIBLE. TAMBIEN SORTEA LA CANTIDAD DE RUTAS.
 export const getZone: RequestHandler = async (req,res) => {
@@ -74,14 +75,28 @@ export const getRoute: RequestHandler = async (req,res) => {
             if ((idRuta > 0) && (idRuta < 6)) {
                 const todosLosEnemigos = await Enemigo.find().exec();
                 // NECESITO LOS ATRIBUTOS DEL ESCUADRON PARA CALCULAR LOS PUNTOS DE BATALLA
-                const todosLosHeroes = await Heroe.find().exec();
+                // const todosLosHeroes = await Heroe.find().exec();
+
+                
                 // ESTA FUNCION LEE: LA LISTA DE INDICES DE HEROES ESCOGIDOS,
                 // LA COLECCION DE DATOS DEL JUGADOR, EN DONDE ESTAN LOS NIVELES,
                 // Y LA COLECCION DE ATRIBUTOS MINIMOS Y MAXIMOS COMPLETA
                     // Y CON ELLA CALCULA LOS ATRIBUTOS DE CADA UNIDAD
-                const lisUnidades = calcularAtributosHeroes(datosJson["ESCUADRON"], datosJson, todosLosHeroes)
+                // const lisUnidades = calcularAtributosHeroes(datosJson["ESCUADRON"], datosJson, todosLosHeroes)
                 // ESTA FUNCION VA A CALCULAR LOS PUNTOS DE BATALLA DEL ESCUADRON
-                const puntosEscuadron = calcularPuntosEscuadron(lisUnidades)
+                // const puntosEscuadron = calcularPuntosEscuadron(lisUnidades)
+
+                // YA NO CALCULA LOS PUNTOS DE BATALA DEL ESCUADRON, LOS LEE DE CADA REGISTRO DE HEROE
+                    // SI TODO SALE BIEN, AQUI NO DEBERIA NECESITAR MAS LA FUNCION calcularPuntosEscuadron()
+
+
+                let puntosEscuadron = 0
+                for (let i = 0; i < datosJson["ESCUADRON"].length; i++) {
+                    if (0 < datosJson["ESCUADRON"][i]) {
+                        puntosEscuadron += parseInt(datosJson["HEROE" + datosJson["ESCUADRON"][i]]["PUNTOSBATALLA"][0]);                   
+                        puntosEscuadron += parseInt(datosJson["HEROE" + datosJson["ESCUADRON"][i]]["PUNTOSBATALLA"][1]);
+                    }
+                }
                 // AHORA SE ARMA LA LISTA DE ENEMIGOS PARA LA RUTA ELEGIDA. 6 SUBLISTAS PARA CADA CAMPAMENTO
                 const lisEnemigosRuta = enemigosSegunZonaRuta(idZona, idRuta, todosLosEnemigos, puntosEscuadron)
 
@@ -105,17 +120,7 @@ export const getRoute: RequestHandler = async (req,res) => {
         res.json(error)
     }
 }
-function calcularPuntosEscuadron(todosLosHeroes: any) {
-    let sumatoria = 0
-    for (let index = 0; index < todosLosHeroes.length; index++) {
-        sumatoria += todosLosHeroes[index].VIDATOTAL +
-        (todosLosHeroes[index].REGENERACION * 30) +
-        (todosLosHeroes[index].DEFENSA * 30) +
-        (todosLosHeroes[index].ATAQUE * (1 / todosLosHeroes[index].CADENCIA)) +
-        todosLosHeroes[index].CRITICO + todosLosHeroes[index].EVASION + todosLosHeroes[index].ATURDIR
-    }
-    return sumatoria;
-}
+
 function enemigosSegunZonaRuta(zona: number, ruta: number, todosLosEnemigos: any, puntosCombate: number) {
     // ESTA FUNCION RECORTA LA LISTA DE ENEMIGOS COMPLETA, Y CONSERVA LOS QUE PERTENECEN A UNA ZONA.
         // SEGUN LOS NIVELES
@@ -297,7 +302,10 @@ export const battle: RequestHandler = async (req,res) => {
         const jugadores = await Jugador.findOne({"NOMBRE": req.body.NOMBRE}).exec();
         const datosString = JSON.stringify(jugadores)
         const datosJson = JSON.parse(datosString);
-        
+        const objeto = await Objeto.find().exec();
+        const objetosString = JSON.stringify(objeto)
+        const objetosJson = JSON.parse(objetosString);
+
         // ESTO ERA PARA EL METODO GET
         // const idZona = parseInt(req.params.zone);
         // const idRuta = parseInt(req.params.route);
@@ -317,41 +325,57 @@ export const battle: RequestHandler = async (req,res) => {
         // Y LA COLECCION DE ATRIBUTOS MINIMOS Y MAXIMOS COMPLETA.
             // Y CON ELLA CALCULA LOS ATRIBUTOS DE CADA HEROE
         lisUnidades = calcularAtributosHeroes(datosJson["ESCUADRON"], datosJson, todosLosHeroes)
-
+        // AÑADE A LA LISTA DE ATRIBUTOS, LOS ATRIBUTOS DE LOS OBJETOS
+        // REQUIERE LA COLECCION DE DATOS DEL JUGADOR(EN DONDE ESTAN LOS OBJETOS EQUIPADOS A CADA HEROE),
+        // LA LISTA DE ATRIBUTOS FINALES,
+        // Y LA COLECCION DE OBJETOS(EN DONDE ESTAN LOS ATRIBUTOS)
+        lisUnidades = agregarAtributosObjetos(datosJson, lisUnidades, objetosJson)
         let puntosNecesarios = 1
+        let chances = 10
         switch (idZona) {
             case 1:
                 puntosNecesarios = 2
+                chances = 10
                 break;
             case 2:
                 puntosNecesarios = 2
+                chances = 20
                 break;
             case 3:
                 puntosNecesarios = 3
+                chances = 20
                 break;
             case 4:
                 puntosNecesarios = 3
+                chances = 30
                 break;
             case 5:
                 puntosNecesarios = 3
+                chances = 30
                 break;
             case 6:
                 puntosNecesarios = 4
+                chances = 40
                 break;
             case 7:
                 puntosNecesarios = 4
+                chances = 40
                 break;
             case 8:
                 puntosNecesarios = 4
+                chances = 50
                 break;
             case 9:
                 puntosNecesarios = 5
+                chances = 50
                 break;
             case 10:
                 puntosNecesarios = 5
+                chances = 60
                 break;
             default:
                 puntosNecesarios = 1
+                chances = 10
                 break;
         }
         // GUARD CLAUSULE CONJUNTO QUE EVALUA:
@@ -401,6 +425,7 @@ export const battle: RequestHandler = async (req,res) => {
                 let lisAtaques = new Array<any>()
                 let unidadesEstadisticas = new Array<number>()
                 let enemigosEstadisticas = new Array<number>()
+                let objetosGanados = new Array<number>()
                 unidadesEstadisticas = [0, 0, 0, 0]
                 enemigosEstadisticas = [0, 0, 0, 0]
                 for (let index = 0; index < lisUnidades.length; index++) {
@@ -429,12 +454,15 @@ export const battle: RequestHandler = async (req,res) => {
                                     lisAtaques = lisauxCuracion[1]
                                     unidadesEstadisticas = lisauxCuracion[2]
                                 } else {
-                                    lisaux = atacarEliminar(lisUnidades[index], lisEnemigos, true, idCamp, lisAtaques, unidadesEstadisticas, enemigosEstadisticas);
+                                    lisaux = atacarEliminar(lisUnidades[index], lisEnemigos, true, idCamp, lisAtaques, unidadesEstadisticas, enemigosEstadisticas, objetosJson, chances, idZona);
                                     monedasRecompensa += parseInt(lisaux[0])
                                     experienciaRecompensa += parseInt(lisaux[1])
                                     lisEnemigos = lisaux[2]
                                     lisAtaques = lisaux[3]
                                     unidadesEstadisticas = lisaux[4]
+                                    if (0 < parseInt(lisaux[5])) {
+                                        objetosGanados.push(parseInt(lisaux[5]))
+                                    }
                                     lisUnidades[index]["PROXATAQUE"] = reloj + lisUnidades[index]["CADENCIA"]
                                     if (lisEnemigos.length <= 0) {
                                         TerminoBatalla = true
@@ -452,7 +480,7 @@ export const battle: RequestHandler = async (req,res) => {
                         for (let index = 0; index < lisEnemigos.length; index++) {
                             if (lisUnidades.length > 0) {
                                 if (reloj >= lisEnemigos[index]["PROXATAQUE"]) {
-                                    lisaux = atacarEliminar(lisEnemigos[index], lisUnidades, false, idCamp, lisAtaques, enemigosEstadisticas, unidadesEstadisticas);
+                                    lisaux = atacarEliminar(lisEnemigos[index], lisUnidades, false, idCamp, lisAtaques, enemigosEstadisticas, unidadesEstadisticas, objetosJson, chances, idZona);
                                     lisUnidades = lisaux[2]
                                     lisAtaques = lisaux[3]
                                     enemigosEstadisticas = lisaux[4]
@@ -534,6 +562,13 @@ export const battle: RequestHandler = async (req,res) => {
                     // EN CASO DE DERROTA
                     monedasRecompensa = Math.floor(monedasRecompensa / 2)
                     experienciaRecompensa = Math.floor(experienciaRecompensa / 2)
+                    const mitadObjetos = Math.floor(objetosGanados.length / 2)
+                    objetosGanados = shuffleArray(objetosGanados)
+                    let objetosAux = new Array<number>()
+                    for (let i = 0; i < mitadObjetos; i++) {
+                        objetosAux.push(objetosGanados[i])
+                    }
+                    objetosGanados = objetosAux
                 }
                 monedasFinal = datosJson["MONEDAS"] + monedasRecompensa
                 let lisExpEscuadron = new Array<any>()
@@ -554,11 +589,18 @@ export const battle: RequestHandler = async (req,res) => {
                                 experienciaHeroe = 0
                             }
                         }
+                        // SI SUBE DE NIVEL, RECALCULA LOS PUNTOS DE BATALLA BASE DEL HEROE
+                        let puntosHeroe = datosJson["HEROE" + datosJson["ESCUADRON"][i]]["PUNTOSBATALLA"][0]
+                        if (subioNivel) {
+                            const atributosHeroe = calcularAtributosUnSoloHeroe(datosJson["ESCUADRON"][i], datosJson, todosLosHeroes)
+                            puntosHeroe = calcularPuntosHeroe(atributosHeroe)
+                        }
                         lisExpEscuadron.push([experienciaHeroe, expNecesaria, nuevoNivel, subioNivel])
                         const heroeJson = {
                             "NIVEL": nuevoNivel,
                             "EXPERIENCIA": experienciaHeroe,
-                            "OBJETOS": [0, 0, 0, 0, 0]
+                            "OBJETOS": datosJson["HEROE" + datosJson["ESCUADRON"][i]]["OBJETOS"],
+                            "PUNTOSBATALLA": [puntosHeroe, datosJson["HEROE" + datosJson["ESCUADRON"][i]]["PUNTOSBATALLA"][1]]
                         }
                         // ESTOS CAMBIOS EN EL REGISTRO SON INDIVIDUALES, MAS NO SON DEFINITIVOS.
                         await Jugador.findOneAndUpdate({"NOMBRE": req.body.NOMBRE}, {$set : {["HEROE" + datosJson["ESCUADRON"][i]]: heroeJson}}, {new: true})
@@ -578,6 +620,11 @@ export const battle: RequestHandler = async (req,res) => {
                         }
                     }
                 }
+                // AÑADIENDO OBJETOS AL INVENTARIO
+                let objetosAux = datosJson["ARRAYOBJETOS"]
+                for (let i = 0; i < objetosGanados.length; i++) {
+                    objetosAux[objetosGanados[i] - 1] += 1
+                }
                 // AÑADIENDO MONEDAS Y EXPERIENCIA PARA MOSTRAR EN EL FRONTEND
                 let lisRecompensas = new Array<number>()
                 lisRecompensas.push(monedasRecompensa)
@@ -586,9 +633,10 @@ export const battle: RequestHandler = async (req,res) => {
                 lisrespuesta.push(lisExpEscuadron)
                 lisrespuesta.push(lisAtaques)
                 lisrespuesta.push([unidadesEstadisticas, enemigosEstadisticas])
+                lisrespuesta.push(objetosGanados)
                 // ESTE SI ES EL ULTIMO CAMBIO QUE ASEGURA GUARDAR EL RESULTADO DEL COMBATE.
                     // Y ES EL QUE SE DEVUELVE AL App DEL FRONTEND.
-                jugador = await Jugador.findOneAndUpdate({"NOMBRE": req.body.NOMBRE}, {$set : {"MONEDAS": monedasFinal, "NIVEL": nuevoNivel, "EXPERIENCIA": experienciaJugador, "ACCION": accionJugador, "PROXCAMP": proxCampamentoJugador, "ZONA": zonaJugador}}, {new: true})
+                jugador = await Jugador.findOneAndUpdate({"NOMBRE": req.body.NOMBRE}, {$set : {"MONEDAS": monedasFinal, "NIVEL": nuevoNivel, "EXPERIENCIA": experienciaJugador, "ACCION": accionJugador, "PROXCAMP": proxCampamentoJugador, "ZONA": zonaJugador, "ARRAYOBJETOS": objetosAux}}, {new: true})
                 
                 console.log("RESULTADOS")
                 
@@ -604,7 +652,7 @@ export const battle: RequestHandler = async (req,res) => {
         res.json(error)
     }
 }
-function atacarEliminar(Atacante: any, lisRivales: any, atacanteHeroe: boolean, ruta: number, lisAtaques: any, lisAcumuladores: any, lisAcumuladoresRival: any) {
+function atacarEliminar(Atacante: any, lisRivales: any, atacanteHeroe: boolean, idCamp: number, lisAtaques: any, lisAcumuladores: any, lisAcumuladoresRival: any, objetosJson: [], chances: number, zona: number) {
     // ESTA FUNCION ESCOGE EL ELEMENTO 0 EN LA LISTA DEL RIVAL, Y LE DESCUENTA VIDA.
         // TAMBIEN ELIMINA EL ELEMENTO 0, SI ESTE NO TIENE VIDA
     // EVALUA SI atacanteHeroe ES TRUE, ENTONCES CALCULA LA RECOMPENSA EN MONEDASY EXP. ADJUNTA TODO A LA RESPUESTA
@@ -633,9 +681,9 @@ function atacarEliminar(Atacante: any, lisRivales: any, atacanteHeroe: boolean, 
             lisAcumuladoresRival[3] += 1;
         }
     }
-    let dañoCausado = lisRivales[0]["VIDAACTUAL"]
+    let dañoCausado = parseInt(lisRivales[0]["VIDAACTUAL"])
     lisRivales[0]["VIDAACTUAL"] -= daniofinal;
-    dañoCausado -= lisRivales[0]["VIDAACTUAL"]
+    dañoCausado -= parseInt(lisRivales[0]["VIDAACTUAL"])
     lisAcumuladores[0] += dañoCausado
 
     // AGREGANDO REGISTRO DE ATAQUES
@@ -650,11 +698,30 @@ function atacarEliminar(Atacante: any, lisRivales: any, atacanteHeroe: boolean, 
     let lisRespuesta = new Array<any>()
     let monedasRecompensaActual = 0
     let experienciaRecompensaActual = 0
+    // let objetosRecompensaActual = new Array<number>()
+    let objetoRecompensaActual = -1
     if (lisRivales[0]["VIDAACTUAL"] <= 0) {
         lisAtaques.push([esHeroe, lisRivales[0]["NOMBRE"] + " fue derrotado."])
         if (atacanteHeroe) {
-            monedasRecompensaActual = sumarMonedas(lisRivales[0]["NIVEL"], ruta)
-            experienciaRecompensaActual = sumarExperiencia(lisRivales[0]["NIVEL"], ruta)
+            monedasRecompensaActual = sumarMonedas(lisRivales[0]["NIVEL"], idCamp)
+            experienciaRecompensaActual = sumarExperiencia(lisRivales[0]["NIVEL"], idCamp)
+
+            // SORTEANDO OBJETOS
+            const dropAux = Math.floor(Math.random() * 100)
+            let objetosAux = new Array<any>()
+            if (dropAux <= chances) {
+                for (let i = 0; i < objetosJson.length; i++) {
+                    // AQUI ARMA UNA LISTA RECORTADA, CON CADA OBJETO CUYO NIVEL SEA <= AL NUMERO DE ZONA -1
+                        // DESPUES TOMA UN OBJETO ALEATORIO DE ESTA LISTA RECORTADA
+                    // ORIGINALMENTE EL NIVEL DEBIA SER <= AL NUMERO DE ZONA.
+                        // PERO ERA ABSURDO JUGAR LA ULTIMA ZONA, PARA CONSEGUIR LOS MEJORES OBJETOS.
+                    if (parseInt(objetosJson[i]["NIVEL"]) <= zona - 1) {
+                        objetosAux.push(i + 1)
+                    }
+                }
+                objetoRecompensaActual = objetosAux[Math.floor(Math.random() * objetosAux.length)]
+            }
+
         }
         lisRivales.shift();
     }
@@ -663,6 +730,8 @@ function atacarEliminar(Atacante: any, lisRivales: any, atacanteHeroe: boolean, 
     lisRespuesta.push(lisRivales)
     lisRespuesta.push(lisAtaques)
     lisRespuesta.push(lisAcumuladores)
+    // lisRespuesta.push(objetosRecompensaActual)
+    lisRespuesta.push(objetoRecompensaActual)
     return lisRespuesta;
 }
 function calcularAtributosHeroes(lisIndices: any, datosJson: any, todosLosHeroes: any) {
@@ -703,6 +772,7 @@ function calcularAtributosHeroes(lisIndices: any, datosJson: any, todosLosHeroes
             const aturdirMaximo = JSON.parse(JSON.stringify(heroeActual))["ATURDIRMAX"]
             const aturdirMinimo = JSON.parse(JSON.stringify(heroeActual))["ATURDIRMIN"]
             let aturdir = (((aturdirMaximo - aturdirMinimo) / nivelMaximo) * nivel) + aturdirMinimo
+            const indice = lisIndices[index]
             const jsonHeroe = {
                 "SANADOR": sanador,
                 "NOMBRE": nombre,
@@ -715,12 +785,57 @@ function calcularAtributosHeroes(lisIndices: any, datosJson: any, todosLosHeroes
                 "PROXATAQUE": proxAtaque,
                 "CRITICO": critico,
                 "EVASION": evasion,
-                "ATURDIR": aturdir
+                "ATURDIR": aturdir,
+                "INDICE": indice
             }
             lisAtributos.push(jsonHeroe)
         }
     }
     return lisAtributos;
+}
+function agregarAtributosObjetos(datosJson: any, lisUnidades: any, lisObjetos: any) {
+    // ESTA FUNCION LEE LA LISTA DE ATRIBUTOS DE CADA UNIDAD,
+        // Y LES AGREGA LOS ATRIBUTOS DE LOS OBJETOS EQUIPADOS
+    for (let i = 0; i < lisUnidades.length; i++) {
+        let ataque = parseInt(lisUnidades[i]["ATAQUE"])
+        let defensa = parseInt(lisUnidades[i]["DEFENSA"])
+        let vidatotal = parseInt(lisUnidades[i]["VIDATOTAL"])
+        let regeneracion = parseInt(lisUnidades[i]["REGENERACION"])
+        let auxSumatoriaCadenciaObjetos = 0
+        let cadencia = parseInt(lisUnidades[i]["CADENCIA"])
+        let critico = parseInt(lisUnidades[i]["CRITICO"])
+        let evasion = parseInt(lisUnidades[i]["EVASION"])
+        let aturdir = parseInt(lisUnidades[i]["ATURDIR"])
+        for (let j = 0; j < 5; j++) {
+            const indiceObjeto = parseInt(datosJson["HEROE" + lisUnidades[i]["INDICE"]]["OBJETOS"][j])
+            if (0 < indiceObjeto) {
+                ataque += lisObjetos[indiceObjeto - 1]["ATAQUE"]
+                defensa += lisObjetos[indiceObjeto - 1]["DEFENSA"]
+                vidatotal += lisObjetos[indiceObjeto - 1]["VIDA"]
+                regeneracion += lisObjetos[indiceObjeto - 1]["REGENERACION"]
+                auxSumatoriaCadenciaObjetos += lisObjetos[indiceObjeto - 1]["CADENCIA"]
+                critico += lisObjetos[indiceObjeto - 1]["CRITICO"]
+                evasion += lisObjetos[indiceObjeto - 1]["EVASION"]
+                aturdir += lisObjetos[indiceObjeto - 1]["ATURDIR"]
+            }
+        }
+        lisUnidades[i]["ATAQUE"] = ataque
+        lisUnidades[i]["DEFENSA"] = defensa
+        lisUnidades[i]["VIDATOTAL"] = vidatotal
+        lisUnidades[i]["VIDAACTUAL"] = vidatotal
+        lisUnidades[i]["REGENERACION"] = regeneracion
+        // LA ACELERACION MAXIMA POR OBJETOS ES DE 90%
+        let enteroADecimal = 90 < auxSumatoriaCadenciaObjetos ? 90 : auxSumatoriaCadenciaObjetos
+        // ASI OBTENGO LA FRACCION RESTANTE A LA ACELERACION, Y CALCULO LA CADENCIA FINAL
+        enteroADecimal = (100 - enteroADecimal) / 100
+        cadencia *= enteroADecimal
+        lisUnidades[i]["CADENCIA"] = cadencia
+        lisUnidades[i]["PROXATAQUE"] = cadencia / 2
+        lisUnidades[i]["CRITICO"] = critico
+        lisUnidades[i]["EVASION"] = evasion
+        lisUnidades[i]["ATURDIR"] = aturdir
+    }
+    return lisUnidades
 }
 function calcularAtributosEnemigos(lisIndices: any, todosLosEnemigos: any) {
     // ESTA FUNCION LEE UNA LISTA DE INDICES, Y DEVUELVE LOS ATRIBUTOS DE CADA ENEMIGO
@@ -807,11 +922,11 @@ function buscarCurar(indiceSanador: number, lisAliados: any, reloj:number, ataca
     lisRespuesta.push(lisAcumuladores)
     return lisRespuesta;
 }
-function sumarMonedas(nivel: number, ruta: number) {
+function sumarMonedas(nivel: number, idCamp: number) {
     // ESTA FUNCION CALCULA LA CANTIDAD DE MONEDAS GANADAS POR DERROTAR A UN ENEMIGO.
     // EL VALOR ES ALEATORIO BASADO EN EL NIVEL DEL ENEMIGO DERROTADO, Y LA RUTA TOMADA.
     let multiploRuta = 0
-    switch (ruta) {
+    switch (idCamp) {
         case 0:
             multiploRuta = 0.8
             break;
@@ -848,12 +963,12 @@ function sumarMonedas(nivel: number, ruta: number) {
     const monedas = (nivel * 100) * (multiploRuta + aleatorio)
     return Math.floor(monedas);
 }
-function sumarExperiencia(nivelEnemigo: number, ruta: number) {
+function sumarExperiencia(nivelEnemigo: number, idCamp: number) {
     // ESTA FUNCION CALCULA LA CANTIDAD DE EXPERIENCIA GANADA POR DERROTAR A UN ENEMIGO.
     // EL VALOR ES ALEATORIO BASADO EN EL NIVEL DEL ENEMIGO DERROTADO, Y LA RUTA TOMADA.
     const expBase = nivelEnemigo * 25
     let multiploRuta = 0
-    switch (ruta) {
+    switch (idCamp) {
         case 0:
             multiploRuta = 0.8
             break;
@@ -889,4 +1004,67 @@ function sumarExperiencia(nivelEnemigo: number, ruta: number) {
     const aleatorio = Math.random() * (0.3 - 0.1) + 0.1
     const experiencia = expBase * (multiploRuta + aleatorio)
     return Math.floor(experiencia);
+}
+function calcularAtributosUnSoloHeroe(Indice: any, datosJson: any, todosLosHeroes: any) {
+    // ESTA FUNCION CALCULA LOS ATRIBUTOS DE UN SOLO HEROE
+        // NO CALCULA EXACTAMENTE TODOS LOS ATRIBUTOS NECESARIOS EN COMBATE.
+    // const nivelMaximo = 100
+    const nivelMaximo = 30
+    const nivel = parseInt(datosJson["HEROE" + Indice]["NIVEL"])
+    // AHORA CON LOS NIVELES, CALCULAR LOS ATRIBUTOS FINALES
+    const heroeActual = todosLosHeroes[Indice - 1]
+    const ataqueMaximo = JSON.parse(JSON.stringify(heroeActual))["ATAQUEMAX"]
+    const ataqueMinimo = JSON.parse(JSON.stringify(heroeActual))["ATAQUEMIN"]
+    let ataque = (((ataqueMaximo - ataqueMinimo) / nivelMaximo) * nivel) + ataqueMinimo
+    const defensaMaximo = JSON.parse(JSON.stringify(heroeActual))["DEFENSAMAX"]
+    const defensaMinimo = JSON.parse(JSON.stringify(heroeActual))["DEFENSAMIN"]
+    let defensa = (((defensaMaximo - defensaMinimo) / nivelMaximo) * nivel) + defensaMinimo
+    const vidaMaximo = JSON.parse(JSON.stringify(heroeActual))["VIDAMAX"]
+    const vidaMinimo = JSON.parse(JSON.stringify(heroeActual))["VIDAMIN"]
+    let vidatotal = (((vidaMaximo - vidaMinimo) / nivelMaximo) * nivel) + vidaMinimo
+    const regenMaximo = JSON.parse(JSON.stringify(heroeActual))["REGENMAX"]
+    const regenMinimo = JSON.parse(JSON.stringify(heroeActual))["REGENMIN"]
+    let regeneracion = (((regenMaximo - regenMinimo) / nivelMaximo) * nivel) + regenMinimo
+    // RECORDAR QUE LA CADENCIA DECRECE A MEDIDA QUE SUBE DE NIVEL
+    const cadenciaMaximo = JSON.parse(JSON.stringify(heroeActual))["CADENCIAMAX"]
+    const cadenciaMinimo = JSON.parse(JSON.stringify(heroeActual))["CADENCIAMIN"]
+    let cadencia = (((cadenciaMaximo - cadenciaMinimo) / nivelMaximo) * (nivelMaximo - nivel)) + cadenciaMinimo
+    const criticoMaximo = JSON.parse(JSON.stringify(heroeActual))["CRITICOMAX"]
+    const criticoMinimo = JSON.parse(JSON.stringify(heroeActual))["CRITICOMIN"]
+    let critico = (((criticoMaximo - criticoMinimo) / nivelMaximo) * nivel) + criticoMinimo
+    const evasionMaximo = JSON.parse(JSON.stringify(heroeActual))["EVASIONMAX"]
+    const evasionMinimo = JSON.parse(JSON.stringify(heroeActual))["EVASIONMIN"]
+    let evasion = (((evasionMaximo - evasionMinimo) / nivelMaximo) * nivel) + evasionMinimo
+    const aturdirMaximo = JSON.parse(JSON.stringify(heroeActual))["ATURDIRMAX"]
+    const aturdirMinimo = JSON.parse(JSON.stringify(heroeActual))["ATURDIRMIN"]
+    let aturdir = (((aturdirMaximo - aturdirMinimo) / nivelMaximo) * nivel) + aturdirMinimo
+    const jsonHeroe = {
+        "ATAQUE": ataque,
+        "DEFENSA": defensa,
+        "VIDATOTAL": vidatotal,
+        "REGENERACION": regeneracion,
+        "CADENCIA": cadencia,
+        "CRITICO": critico,
+        "EVASION": evasion,
+        "ATURDIR": aturdir
+    }
+    return jsonHeroe;
+}
+function calcularPuntosHeroe(Heroe: any) {
+    const sumatoria = Heroe.VIDATOTAL +
+    (Heroe.REGENERACION * 30) +
+    (Heroe.DEFENSA * 30) +
+    (Heroe.ATAQUE * (1 / Heroe.CADENCIA)) +
+    Heroe.CRITICO + Heroe.EVASION + Heroe.ATURDIR
+    return Math.floor(sumatoria);
+}
+/* Randomize array in-place using Durstenfeld shuffle algorithm */
+function shuffleArray(array: any) {
+    for (var i = array.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+    return array;
 }

@@ -39,6 +39,9 @@ router.post('/buyHero', heroCtrl.buyHero);
 router.get('/getAvailable', heroCtrl.getAvailable);
 // router.put('/setSquad', rpgCtrl.setSquad);
 router.post('/setSquad', heroCtrl.setSquad);
+router.post('/attrib', heroCtrl.getAttributes);
+router.post('/objects', heroCtrl.getObjects);
+router.post('/saveInv', heroCtrl.saveInventory);
 
 
 // router.get('/zone/:id', rpgCtrl.getZone);
@@ -49,4 +52,3 @@ router.post('/route', rpgCtrl.getRoute);
 router.post('/battle', rpgCtrl.battle);
 
 export default router;
-    
