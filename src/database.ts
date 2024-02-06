@@ -31,12 +31,13 @@ import { hostname } from "os";
             // SOLO FUNCIONA SI MONGO TIENE ACTIVADA LA security: authorization: enabled
             // PERO REQUIERE EL USUARIO Y CLAVE DE ADMINISTRADOR
         const db = await mongoose.connect(
-
             // ESTA ES LA RUTA DE CONEXION LOCAL
-            // `mongodb://${config.MONGO_USER}:${config.MONGO_PASSWORD}@${config.MONGO_HOST}/${config.MONGO_DATABASE}`,
-            // mongooseOptions
+            `mongodb://${config.MONGO_USER}:${config.MONGO_PASSWORD}@${config.MONGO_HOST}/${config.MONGO_DATABASE}`,
+            mongooseOptions
 
-            `mongodb+srv://rubensilbano1990:<password>@cluster0.7ucqdjs.mongodb.net/?retryWrites=true&w=majority`
+            // ESTA ES LA RUTA DE CONEXION DE MONGODB ATLAS
+            // `mongodb+srv://rubensilbano1990:<password>@cluster0.7ucqdjs.mongodb.net/?retryWrites=true&w=majority`
+
         );
         console.log('Base de datos conectada', db.connection.name);
     } catch (error) {
