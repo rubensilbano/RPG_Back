@@ -31,8 +31,12 @@ import { hostname } from "os";
             // SOLO FUNCIONA SI MONGO TIENE ACTIVADA LA security: authorization: enabled
             // PERO REQUIERE EL USUARIO Y CLAVE DE ADMINISTRADOR
         const db = await mongoose.connect(
-            `mongodb://${config.MONGO_USER}:${config.MONGO_PASSWORD}@${config.MONGO_HOST}/${config.MONGO_DATABASE}`,
-            mongooseOptions
+
+            // ESTA ES LA RUTA DE CONEXION LOCAL
+            // `mongodb://${config.MONGO_USER}:${config.MONGO_PASSWORD}@${config.MONGO_HOST}/${config.MONGO_DATABASE}`,
+            // mongooseOptions
+
+            `mongodb+srv://rubensilbano1990:<password>@cluster0.7ucqdjs.mongodb.net/?retryWrites=true&w=majority`
         );
         console.log('Base de datos conectada', db.connection.name);
     } catch (error) {
@@ -55,4 +59,35 @@ database.on(
 );
 database.once("open", () => console.log("✅ mongodb CONECTADA EN EL SERVIDOR", mongoose.connection.name));
 mongoose.Promise = Promise;
+*/
+
+
+
+/*
+// METODO PARA MONGODB ATLAS
+const { MongoClient, ServerApiVersion } = require('mongodb');
+const uri = "mongodb+srv://rubensilbano1990:<password>@cluster0.7ucqdjs.mongodb.net/?retryWrites=true&w=majority";
+
+// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+const client = new MongoClient(uri, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  }
+});
+
+async function run() {
+  try {
+    // Connect the client to the server	(optional starting in v4.7)
+    await client.connect();
+    // Send a ping to confirm a successful connection
+    await client.db("admin").command({ ping: 1 });
+    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+  } finally {
+    // Ensures that the client will close when you finish/error
+    await client.close();
+  }
+}
+run().catch(console.dir);
 */
